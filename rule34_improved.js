@@ -21,7 +21,7 @@
     var ViewportDependentHeight  = 70;    // (1-100)      the size used by above. (in %)
     var stretchImgVid            = false; // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
     var trueVideoSize            = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
-    var enableFavOnEnter         = false; // (true/false) Use the "ENTER" key on your keyboard to add to favorites
+    var enableFavOnEnter         = true; // (true/false) Use the "ENTER" key on your keyboard to add to favorites
 
     //- Don't touch anything else unless you know what you're doing
     var viewPDepenCSS = "";
@@ -66,11 +66,22 @@
     }
 	
     if (enableFavOnEnter) {
-        $(document).on('keypress', function(e) {
-            if (e.keyCode == 13 && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
-                $("#stats + div > ul > li > a:contains('Add to favorites')").click();
+        document.onkeydown=nextpage; 
+        function nextpage(e){
+            var event = document.all ? window.event : e;
+            switch (e.target.tagName.toLowerCase()) {
+                case "input":
+                case "textarea":
+                case "select":
+                case "button":
+                case "tags":
+                case "comment":
+                    break;
+                default:
+                    if (event.keyCode==13) $("#stats + div > ul > li > a:contains('Add to favorites')").click();
+                    break;
             }
-        });
+        }
     }
 
     //BUTTONS
