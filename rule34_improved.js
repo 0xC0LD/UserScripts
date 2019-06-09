@@ -72,7 +72,8 @@
             }
         });
     }
-      //BUTTONS
+
+    //BUTTONS
     $("#edit_form").prev().before(
         '<img id="btn-like" class="custom-button" alt="like"     src="https://i.imgur.com/TOQLRok.png">' +
         '<img id="btn-fav"  class="custom-button" alt="favorite" src="https://i.imgur.com/dTpBrIj.png">' +
