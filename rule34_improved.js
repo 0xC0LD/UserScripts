@@ -23,17 +23,16 @@
     var trueVideoSize             = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
     var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
     var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
-  
-  
-  
+    //- Don't touch anything else unless you know what you're doing
+
+
     if (hideBlacklistedThumbnails) {
         var elements = document.getElementsByClassName("thumb blacklisted-image");
         while (elements[0]) {
             elements[0].parentNode.removeChild(elements[0]);
         }  
     }
-  
-    //- Don't touch anything else unless you know what you're doing
+
     var viewPDepenCSS = "";
     if(useViewportDependentSize) {
         viewPDepenCSS = (stretchImgVid ? `
@@ -50,8 +49,6 @@
         }
         `;
     }
-  
-    
 
     addGlobalStyle(`
         #content > #post-view > #right-col > div > img.custom-button {
