@@ -14,15 +14,25 @@
     'use strict';
 
     // ===[ Settings ]===
-    var autoplayVideos           = false; // (true/false) Automatically play the video
-    var defaultVideoVolume       = 1;     // (0-1)        0=mute, 0.5=50%, 1=100%, etc.
-    var useViewportDependentSize = true;  // (true/false) Makes the max-width/max-height of all images and videos X% of the viewport (inner window of the browser) width/height.
-    var ViewportDependentWidth   = 70;    // (1-100)      the size used by above. (in %)    
-    var ViewportDependentHeight  = 70;    // (1-100)      the size used by above. (in %)
-    var stretchImgVid            = false; // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
-    var trueVideoSize            = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
-    var enableFavOnEnter         = true; // (true/false) Use the "ENTER" key on your keyboard to add to favorites
-
+    var autoplayVideos            = false; // (true/false) Automatically play the video
+    var defaultVideoVolume        = 1;     // (0-1)        0=mute, 0.5=50%, 1=100%, etc.
+    var useViewportDependentSize  = true;  // (true/false) Makes the max-width/max-height of all images and videos X% of the viewport (inner window of the browser) width/height.
+    var ViewportDependentWidth    = 70;    // (1-100)      the size used by above. (in %)    
+    var ViewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
+    var stretchImgVid             = false; // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
+    var trueVideoSize             = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
+    var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
+    var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
+  
+  
+  
+    if (hideBlacklistedThumbnails) {
+        var elements = document.getElementsByClassName("thumb blacklisted-image");
+        while (elements[0]) {
+            elements[0].parentNode.removeChild(elements[0]);
+        }  
+    }
+  
     //- Don't touch anything else unless you know what you're doing
     var viewPDepenCSS = "";
     if(useViewportDependentSize) {
@@ -40,6 +50,8 @@
         }
         `;
     }
+  
+    
 
     addGlobalStyle(`
         #content > #post-view > #right-col > div > img.custom-button {
