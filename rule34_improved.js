@@ -16,8 +16,7 @@
     // ===[ Settings ]===
     var autoplayVideos            = false; // (true/false) Automatically play the video
     var defaultVideoVolume        = 1;     // (0-1)        0=mute, 0.5=50%, 1=100%, etc.
-    var useViewportDependentSize  = true;  // (true/false) Makes the max-width/max-height of all images and videos X% of the viewport (inner window of the browser) width/height.
-    var ViewportDependentWidth    = 70;    // (1-100)      the size used by above. (in %)    
+    var useViewportDependentSize  = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
     var ViewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
     var stretchImgVid             = false; // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
     var trueVideoSize             = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
