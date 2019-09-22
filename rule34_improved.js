@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Rule34.xxx Improved
 // @namespace    UserScript
-// @version      0.2
+// @version      0.3
 // @description  Bunch of improvements for rule34.xxx
 // @author       Hentiedup, 0xC0LD
 // @match        https://rule34.xxx/*
@@ -12,18 +12,17 @@
 
 (function() {
     'use strict';
-
     // ===[ Settings ]===
     var autoplayVideos            = false; // (true/false) Automatically play the video
     var defaultVideoVolume        = 1;     // (0-1)        0=mute, 0.5=50%, 1=100%, etc.
     var useViewportDependentSize  = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
     var ViewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
-    var stretchImgVid             = false; // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
+    var stretchImgVid             = true;  // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
     var trueVideoSize             = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
     var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
     var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
+    var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
     //- Don't touch anything else unless you know what you're doing
-
 
     if (hideBlacklistedThumbnails) {
         var elements = document.getElementsByClassName("thumb blacklisted-image");
@@ -32,6 +31,10 @@
         }  
     }
 
+    if (forceDarkTheme) {
+        $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
+    }
+  
     var viewPDepenCSS = "";
     if(useViewportDependentSize) {
         viewPDepenCSS = (stretchImgVid ? `
