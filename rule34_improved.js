@@ -22,7 +22,7 @@
     var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
     var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
     var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
-    //- Don't touch anything else unless you know what you're doing
+    // - Don't touch anything else unless you know what you're doing
     
     // fix search box size
     $("#stags").attr("size", "14");
