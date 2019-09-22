@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Rule34.xxx Improved
 // @namespace    UserScript
-// @version      0.3
+// @version      0.2
 // @description  Bunch of improvements for rule34.xxx
 // @author       Hentiedup, 0xC0LD
 // @match        https://rule34.xxx/*
@@ -23,6 +23,9 @@
     var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
     var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
     //- Don't touch anything else unless you know what you're doing
+    
+    // fix search box size
+    $("#stags").attr("size", "14");
 
     if (hideBlacklistedThumbnails) {
         var elements = document.getElementsByClassName("thumb blacklisted-image");
@@ -32,7 +35,22 @@
     }
 
     if (forceDarkTheme) {
-        $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
+      	// dark theme on main page
+        if (window.location == "https://rule34.xxx/") {
+            // force dark theme
+            $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
+        }
+      
+      	// dark theme on other pages
+      	$("link").each(function() {
+            var url = this.href;
+            if (url == "https://rule34.xxx/css/desktop.css?6") {
+                // replace white theme with dark theme
+                $(this).attr('href', "https://rule34.xxx/css/desktop_bip.css?6");
+            }      
+        });
+
+        //$('div').css({'background-color': '#303a30'});
     }
   
     var viewPDepenCSS = "";
@@ -95,7 +113,7 @@
         }
     }
 
-    //BUTTONS
+    // buttons
     $("#edit_form").prev().before(
         '<img id="btn-like" class="custom-button" alt="like"     src="https://i.imgur.com/TOQLRok.png">' +
         '<img id="btn-fav"  class="custom-button" alt="favorite" src="https://i.imgur.com/dTpBrIj.png">' +
@@ -103,7 +121,7 @@
         '<img id="btn-next" class="custom-button" alt="next"     src="https://i.imgur.com/v6rmImf.png">'
     );
 
-    //BUTTON EVENTS
+    // button click events
     $("#btn-like").click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')").click();         });
     $("#btn-fav").click(function()  { $("#stats + div > ul > li > a:contains('Add to favorites')").click();           });
     $("#btn-prev").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
