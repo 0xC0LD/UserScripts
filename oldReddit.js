@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         OLD REDDIT
+// @name         FORCE OLD REDDIT
 // @namespace    UserScript
 // @version      0.1
 // @description  reddit -> old.reddit
@@ -10,4 +10,4 @@
 // ==/UserScript==
 
 var url = window.document.location.toString();
-if(url.includes("://www.reddit.com")) { var newURL = url.replace("://www","://old"); window.document.location.replace(newURL); }
+if (url.includes("://www.reddit.com")) { var newURL = url.replace("://www","://old"); window.document.location.replace(newURL); }
