@@ -10,6 +10,8 @@
 // @icon         data:image/ico;base64,AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAAAAD///8BADMA/wAAAP8AMwD/AAAA/wAzAP8AMwD/AAAA/wAzAP8AAAD/ADMA/wAzAP8AAAD/ADMA/wAAAP////8BM2Yz/wAzAP+Z/5n/AAAA/5n/mf8AAAD/ADMA/5n/mf8AAAD/mf+Z/wAAAP8AMwD/mf+Z/wAAAP+Z/5n/AAAA/zNmM/8AMwD/AAAA/5n/mf8AAAD/ADMA/wAzAP8AAAD/mf+Z/wAAAP8AMwD/ADMA/wAAAP+Z/5n/AAAA/wAzAP8zZjP/ADMA/5n/mf8AAAD/mf+Z/wAAAP8AMwD/mf+Z/wAAAP+Z/5n/AAAA/wAzAP+Z/5n/AAAA/5n/mf8AAAD/M2Yz/zNmM/8AAAD/AAAA/wAAAP8AAAD/M2Yz/wAzAP8AMwD/ADMA/wAzAP8zZjP/AAAA/zNmM/8AMwD/ADMA/zNmM/8AAAD/AAAA/wAAAP8AAAD/AAAA/wAAAP8zZjP/M2Yz/zNmM/8zZjP/M2Yz/wAAAP8AAAD/M2Yz/zNmM/8zZjP/AAAA/////////////////wAAAP8AAAD/AAAA/zNmM/8zZjP/M2Yz/zNmM///////AAAA/wAAAP8zZjP/M2Yz//////8AAAD/M2Yz/zNmM///////AAAA/wAAAP8zZjP/M2Yz/zNmM/8AAAD//////wAAAP8AAAD/AAAA/zNmM/8zZjP/AAAA/wAAAP8AAAD//////wAAAP8AAAD/AAAA/wAAAP8AAAD/AAAA//////8AAAD/AAAA/wAAAP8zZjP/M2Yz/wAAAP8AAAD/AAAA//////8AAAD/AAAA//////////////////////////////////////8AAAD/M2Yz/zNmM/////////////////8AAAD/AAAA/zNmM///////AAAA/wAAAP8zZjP//////wAAAP8AAAD/AAAA/zNmM/8AAAD/AAAA/zNmM/8zZjP//////wAAAP8AAAD/M2Yz//////8AAAD/AAAA//////8AAAD/AAAA/zNmM/8zZjP/AAAA/wAAAP8AAAD/AAAA//////8AAAD/AAAA/zNmM/8zZjP//////wAAAP//////AAAA/wAAAP8zZjP/M2Yz//////8AAAD/AAAA/wAAAP//////AAAA/wAAAP8zZjP/M2Yz/zNmM////////////wAAAP8AAAD/M2Yz/zNmM/8zZjP/////////////////AAAA/wAAAP8zZjP/M2Yz/zNmM/8zZjP/M2Yz//////8AAAD/AAAA/zNmM/////8BM2Yz/zNmM/8zZjP/M2Yz/zNmM/8zZjP/M2Yz/zNmM/8zZjP/M2Yz/zNmM/8zZjP/M2Yz/zNmM/////8BAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//w==
 // ==/UserScript==
 
+
+
 (function() {
     'use strict';
     // ===[ Settings ]===
@@ -35,6 +37,13 @@
     }
 
     if (forceDarkTheme) {
+      	
+      	// select dark theme
+      	document.querySelector('.form > tbody:nth-child(1) > tr:nth-child(11) > td:nth-child(2) > input:nth-child(3)').click();
+      	
+        // $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
+      
+      	/*
       	// dark theme on main page
         if (window.location == "https://rule34.xxx/") {
             // force dark theme
@@ -51,6 +60,7 @@
         });
 
         //$('div').css({'background-color': '#303a30'});
+        /**/
     }
   
     var viewPDepenCSS = "";
