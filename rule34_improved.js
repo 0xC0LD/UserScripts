@@ -39,15 +39,116 @@
     if (forceDarkTheme) {
       	
       	// select dark theme
-      	document.querySelector('.form > tbody:nth-child(1) > tr:nth-child(11) > td:nth-child(2) > input:nth-child(3)').click();
+      	//document.querySelector('.form > tbody:nth-child(1) > tr:nth-child(11) > td:nth-child(2) > input:nth-child(3)').click();
       	
         // $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
       
-      	/*
+      	///*
       	// dark theme on main page
         if (window.location == "https://rule34.xxx/") {
             // force dark theme
             $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
+        }
+      
+      	// dark theme on other pages
+      	$("link").each(function() {
+            var url = this.href;
+            if (url == "https://rule34.xxx/css/desktop.css?6") {
+                // replace white theme with dark theme
+                $(this).attr('href', "https://rule34.xxx/css/desktop_bip.css?6");
+            }      
+        });
+
+        //$('div').css({'background-color': '#303a30'});
+        /**/
+    }
+  
+    var viewPDepenCSS = "";
+    if(useViewportDependentSize) {
+        viewPDepenCSS = (stretchImgVid ? `
+        #gelcomVideoContainer {
+            width: auto !important;
+            max-width: 100% !important;
+            height: ` + ViewportDependentHeight + `vh !important;
+        }
+        ` : "") + `
+        #image {
+            width: auto !important;
+            max-width: 100% !important;
+            ` + (stretchImgVid ? "" : "max-") + `height: ` + ViewportDependentHeight + `vh !important;
+        }
+        `;
+    }
+
+    addGlobalStyle(`
+        #content > #post-view > #right-col > div > img.custom-button {
+            cursor: pointer;
+            width: 50px;
+            padding: 3px;
+            margin: 0;
+            border-radius: 20px;
+        }
+        .custom-button:hover {
+            background-color: rgba(255,255,255,.2);
+        }
+        .custom-button:active {
+            background-color: rgba(255,255,255,1);
+        }
+        ` + viewPDepenCSS + ``
+    );
+
+    $("#gelcomVideoPlayer").prop("volume", defaultVideoVolume);
+    if(autoplayVideos) { $("#gelcomVideoPlayer").prop("autoplay", true); }
+	
+    if(!stretchImgVid && trueVideoSize) {
+        $("#gelcomVideoContainer").prop("style", "width: " + ($("#stats > ul > li:contains('Size: ')").text().split(": ")[1].split("x")[0]) + "px; max-width: 100%; height: " + ($("#stats > ul > li:contains('Size: ')").text().split("x")[1]) + "px;");
+    }
+	
+    if (enableFavOnEnter) {
+        document.onkeydown=nextpage; 
+        function nextpage(e){
+            var event = document.all ? window.event : e;
+            switch (e.target.tagName.toLowerCase()) {
+                case "input":
+                case "textarea":
+                case "select":
+                case "button":
+                case "tags":
+                case "comment":
+                    break;
+                default:
+                    if (event.keyCode==13) $("#stats + div > ul > li > a:contains('Add to favorites')").click();
+                    break;
+            }
+        }
+    }
+
+    // buttons
+    $("#edit_form").prev().before(
+        '<img id="btn-like" class="custom-button" alt="like"     src="https://i.imgur.com/TOQLRok.png">' +
+        '<img id="btn-fav"  class="custom-button" alt="favorite" src="https://i.imgur.com/dTpBrIj.png">' +
+        '<img id="btn-prev" class="custom-button" alt="previous" src="https://i.imgur.com/Qh5DWPR.png">' +
+        '<img id="btn-next" class="custom-button" alt="next"     src="https://i.imgur.com/v6rmImf.png">'
+    );
+
+    // button click events
+    $("#btn-like").click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')").click();         });
+    $("#btn-fav").click(function()  { $("#stats + div > ul > li > a:contains('Add to favorites')").click();           });
+    $("#btn-prev").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
+    $("#btn-next").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')").click();     });
+
+    function addGlobalStyle(css) {
+        var head, style;
+        head = document.getElementsByTagName('head')[0];
+        if (!head) { return; }
+        style = document.createElement('style');
+        style.type = 'text/css';
+        style.innerHTML = css;
+        head.appendChild(style);
+    }
+ 
+})();
+
         }
       
       	// dark theme on other pages
