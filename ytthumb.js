@@ -1,28 +1,33 @@
 // ==UserScript==
-// @name         Youtube Thumbnail
+// @name         youtube thumb
 // @namespace    UserScript
-// @version      0.1
-// @description  Adds a thumbnail href button for the current video
-// @author       0xC0LD
-// @match        https://www.youtube.com/*
-// @grant        none
-// @icon         https://s.ytimg.com/yts/img/favicon-vfl8qSV2F.ico
+// @version      1.0
+// @description  adds a href/link/button to the current thumbnail of a video
+// @author       C0LD
+// @include      http*://*.youtube.com/*
+// @include      http*://youtube.com/*
+// @include      http*://*.youtu.be/*
+// @include      http*://youtu.be/*
+// @run-at       document-end
 // ==/UserScript==
 
 function polymerInject(){
+	/* Create button */
 	var buttonDiv = document.createElement("a");
-	buttonDiv.style.width = "100%";
-	buttonDiv.id = "parentButton";
 	var url = window.document.location.toString();
 	var id = url.replace("https://www.youtube.com/watch?v=", "");
 	var thumbUrl = 'https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg';
 	buttonDiv.href = thumbUrl;
+	buttonDiv.style.width = "100%";
+	buttonDiv.id = "parentButton";
 	var addButton = document.createElement("button");
 	addButton.appendChild(document.createTextNode("Thumbnail"));
+
 	if(typeof(document.getElementById("iframeDownloadButton")) != 'undefined' && document.getElementById("iframeDownloadButton") !== null){
 		document.getElementById("iframeDownloadButton").remove();
 	}
-	addButton.style.width = "10%";
+
+	addButton.style.width = "100px";
 	addButton.style.backgroundColor = "#181717";
 	addButton.style.color = "white";
 	addButton.style.textAlign = "center";
@@ -34,14 +39,16 @@ function polymerInject(){
 	addButton.style.borderRadius = "2px";
 	addButton.style.fontFamily = "Roboto, Arial, sans-serif";
 	buttonDiv.appendChild(addButton);
-	
+
+	/* Find and add to target */
 	var targetElement = document.querySelectorAll("[id='container']");
 	for(var i = 0; i < targetElement.length; i++){
 		if(targetElement[i].className.indexOf("ytd-video-secondary-info-renderer") > -1){
 			targetElement[i].appendChild(buttonDiv);
 		}
 	}
-	
+
+	/* Fix hidden description bug */
 	var descriptionBox = document.querySelectorAll("ytd-video-secondary-info-renderer");
 	if(descriptionBox[0].className.indexOf("loading") > -1){
 		descriptionBox[0].classList.remove("loading");
@@ -65,7 +72,7 @@ function standardInject() {
 				mutations.forEach(function(mutation) {
 					if(mutation.addedNodes!==null) {
 						for (var i=0; i<mutation.addedNodes.length; i++) {
-								mutation.addedNodes[i].id=='watch7-container' ||
+							if (mutation.addedNodes[i].id=='watch7-container' ||
 								mutation.addedNodes[i].id=='watch7-main-container') { // old value: movie_player
 								run();
 								break;
@@ -82,37 +89,30 @@ function standardInject() {
 }
 
 function onNodeInserted(e) {
-	if (e && e.target && (e.target.id=='watch7-container' || e.target.id=='watch7-main-container')) { run(); }
+    if (e && e.target && (e.target.id=='watch7-container' ||
+                          e.target.id=='watch7-main-container')) { // old value: movie_player
+        run();
+    }
 }
 
-function finalButton(){
-	var buttonIframeDownload = document.createElement("iframe");
-	buttonIframeDownload.src = '//www.convertmp3.io/widget/button/?color=ba1717&amp;video=' + window.location.href;
-	buttonIframeDownload.id = "buttonIframe";
-	buttonIframeDownload.style.width = "100%";
-	buttonIframeDownload.style.height = "60px";
-	buttonIframeDownload.style.paddingTop = "20px";
-	buttonIframeDownload.style.paddingBottom = "20px";
-	buttonIframeDownload.style.overflow = "hidden";
-	buttonIframeDownload.scrolling = "no";
-	document.getElementById("watch-header").appendChild(buttonIframeDownload);
-}
-
-function run(){
+function run() {
 	if(!document.getElementById("parentButton") && window.location.href.substring(0, 25).indexOf("youtube.com") > -1 && window.location.href.indexOf("watch?") > -1){
+		
 		var parentButton = document.createElement("div");
+		
 		parentButton.className = "yt-uix-button yt-uix-button-default";
 		parentButton.id = "parentButton";
+		
 		parentButton.style.height = "23px";
 		parentButton.style.marginLeft = "28px";
 		parentButton.style.paddingBottom = "1px";
-		parentButton.onclick = function () {
-			this.remove();
-			finalButton();
-		};
+		
+		parentButton.onclick = function () { this.remove(); };
+		
 		document.getElementById("watch7-user-header").appendChild(parentButton);
+		
 		var childButton = document.createElement("span");
-		childButton.appendChild(document.createTextNode("Download MP3"));
+		childButton.appendChild(document.createTextNode("Thumbnail"));
 		childButton.className = "yt-uix-button-content";
 		childButton.style.lineHeight = "25px";
 		childButton.style.fontSize = "12px";
@@ -122,12 +122,11 @@ function run(){
 
 if(document.getElementById("polymer-app") || document.getElementById("masthead") || window.Polymer){
 	setInterval(function(){
-		if(window.location.href.indexOf("watch?v=") < 0){ return false; }
-		if(document.getElementById("count") && document.getElementById("parentButton") === null){
-			polymerInject();
-		}
+		if(window.location.href.indexOf("watch?v=") < 0) { return false; }
+		if(document.getElementById("count") && document.getElementById("parentButton") === null) { polymerInject(); }
 	}, 100);
 }
-else{
-	standardInject();
-}
+else { standardInject(); }
+
+    
+
