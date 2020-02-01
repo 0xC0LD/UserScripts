@@ -9,6 +9,7 @@
 // @include      http*://*.youtu.be/*
 // @include      http*://youtu.be/*
 // @run-at       document-end
+// @icon         https://www.youtube.com/favicon.ico
 // ==/UserScript==
 
 function polymerInject(){
