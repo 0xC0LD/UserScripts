@@ -11,49 +11,64 @@
 // ==/UserScript==
 
 // ===[ Settings ]===
-var autoplayVideos = false;           // (true/false) Automatically play the video
-var defaultVideoVolume = 1;           // (0-1)        0=mute, 0.5=50%, 1=100%, etc.
-var useViewportDependentSize = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
-var ViewportDependentHeight = 70;     // (1-100)      the size used by above. (in %)
-var stretchImgVid = true;             // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
-var trueVideoSize = false;            // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
-var enableFavOnEnter = true;          // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
-var hideBlacklistedThumbnails = true; // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
-var forceDarkTheme = true;            // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
-var endlessScrolling = true;          // (true/false) endless scrolling
-var endlessScrollingInFav = false;    // (true/false) (must enable endlessScrolling first) enable endless scrolling in favorites (must disabled when searching through favorites with favFilter, otherwise content will conflict)
-var favFilter = true;                 // (true/false) adds a tag searchbox in favorites
+var autoplayVideos            = false; // (true/false) Automatically play the video
+var defaultVideoVolume        = 1;     // (0-1) 0 = mute, 0.5=50%, 1=100%, etc.
+var useViewportDependentSize  = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
+var ViewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
+var stretchImgVid             = true;  // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
+var trueVideoSize             = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
+var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
+var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
+var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
+var endlessScrolling          = true;  // (true/false) endless scrolling
+var endlessScrollingInFav     = false; // (true/false) (must enable endlessScrolling first) enable endless scrolling in favorites (must disabled when searching through favorites with favFilter, otherwise content will conflict)
+var favFilter                 = true;  // (true/false) adds a tag searchbox in favorites
 // - Don't touch anything else unless you know what you're doing
 
 // credits:
-// 	* Hentiedup
-//		- autoplayVideos
-//		- defaultVideoVolume
-//		- useViewportDependentHeight
-//		- ViewportDependentHeight
-//		- stretchImgVid
-//		- trueVideoSize
+// 	* Hentiedupgg
+//    - original author
+//		- opt autoplayVideos
+//		- opt defaultVideoVolume
+//		- opt useViewportDependentHeight
+//		- opt ViewportDependentHeight
+//		- opt stretchImgVid
+//		- opt trueVideoSize
 //	* 0xC0LD
-//		- enableFavOnEnter
-//		- hideBlacklistedThumbnails
-//		- forceDarkTheme
-//		- endlessScrollingInFav
+//		- code cleanup
+//		- comments
+//		- opt enableFavOnEnter
+//		- opt hideBlacklistedThumbnails
+//		- opt forceDarkTheme
+//		- opt endlessScrollingInFav
 //	* usnkw
-//		- endlessScrolling
-//		- favFilter
+//		- opt endlessScrolling
+//		- opt favFilter
 
 function sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+if (hideBlacklistedThumbnails) {
+    $(window).on('DOMContentLoaded load', async function() {
+        var elements = document.getElementsByClassName("thumb blacklisted-image");
+        var i = 0;
+        while (elements[0]) {
+            i++;
+            elements[0].parentNode.removeChild(elements[0]);
+        }
+        if (i > 0) {
+            console.log("removed content: " + i);
+        }
+    });
 }
 
 if (endlessScrolling) {
     $.fn.isInViewport = function() {
         var elementTop = $(this).offset().top;
         var elementBottom = elementTop + $(this).outerHeight();
-
         var viewportTop = $(window).scrollTop();
         var viewportBottom = viewportTop + $(window).height();
-
         return elementBottom > viewportTop && elementTop < viewportBottom;
     };
 
@@ -65,28 +80,18 @@ if (endlessScrolling) {
             return;
         }
 
-        var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href :
-            /(.*)&pid=/gm.exec(document.location.href)[1];
+        var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
         var step = base.includes("favorites") ? 50 : 42;
 
-        var max;
+
         var el = step == 50 ? document.getElementsByName("lastpage")[0] : document.getElementsByTagName("a")[document.getElementsByTagName("a").length - 2];
         var text = step == 50 ? el.attributes[1].nodeValue : el.href;
         var maxMatch = reg.exec(text);
+        var max = maxMatch == null ? 0 : max = parseInt(maxMatch[1]);
 
-        if (maxMatch == null) {
-            max = 0;
-        } else {
-            max = parseInt(maxMatch[1]);
-        }
 
-        var cur;
         var curMatch = /pid=([0-9]*)/gm.exec(add);
-        if (curMatch == null) {
-            cur = 0;
-        } else {
-            cur = parseInt(curMatch[1]);
-        }
+        var cur = curMatch == null ? 0 : parseInt(curMatch[1]);
 
         //console.log("DEBUG:");
         //console.log(base);
@@ -100,7 +105,7 @@ if (endlessScrolling) {
             if ($('#paginator').isInViewport() && loadNext) {
                 loadNext = false;
                 cur += step;
-                //console.log("Loading" + cur);
+                console.log("loading: " + cur);
                 getImagesFromUrl(base + "&pid=" + cur);
                 await sleep(1000);
                 loadNext = true;
@@ -108,35 +113,45 @@ if (endlessScrolling) {
         });
     };
 
+    var originalTitle = document.title;
+
     function getImagesFromUrl(url) {
-        var ifream = document.createElement("iframe");
-        ifream.src = url;
-        ifream.onload = function() {
-            var images = ifream.contentWindow.document.getElementsByTagName("img");
+        var ifr = document.createElement("iframe");
+        ifr.style = "width:0; height:0; border:0; border:none";
+        ifr.src = url;
+        ifr.onload = function() {
+            var images = ifr.contentWindow.document.getElementsByTagName("img");
             //console.log(images);
-            for (i = images.length - 1; i >= 0; i--) {
-                //console.log()
+            var t = 0;
+            var g = 0;
+            for (i = 0; i < images.length; i++) {
                 if (images[i].parentNode.parentNode.tagName == "SPAN") {
+                    t++;
+                    if (hideBlacklistedThumbnails && images[i].parentNode.parentNode.className == "thumb blacklisted-image") {
+                        continue;
+                    }
                     document.getElementById("paginator").parentNode.insertBefore(images[i].parentNode.parentNode, document.getElementById("paginator"));
+                    g++;
                 }
             }
-            ifream.parentNode.removeChild(ifream);
+            console.log("images: " + g + "/" + t + " (-" + (t - g) + ")");
+            document.title = originalTitle;
+            ifr.parentNode.removeChild(ifr);
         }
-        document.body.appendChild(ifream);
-
+        document.title = document.title + " - Loading..."
+        document.body.appendChild(ifr);
     }
 
     $(document).ready(function() {
         main_scroll();
-        //console.log("Endless Scrolling active");
     });
 }
 
+// TODO: CHECK IN WHICH ORDER IT GETS DISPLAYED
 if (favFilter) {
     async function main_favFilter() {
         var reg = /pid=([0-9]*)/gm;
-        var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href :
-            /(.*)&pid=/gm.exec(document.location.href)[1];
+        var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
         if (!base.includes("favorites")) {
             return console.log("not a favorites page");
         };
@@ -145,20 +160,9 @@ if (favFilter) {
         var max;
         var el = document.getElementsByName("lastpage")[0];
         var maxMatch = reg.exec(el.attributes[1].nodeValue);
-
-        if (maxMatch == null) {
-            max = 0;
-        } else {
-            max = parseInt(maxMatch[1]);
-        }
-
-        var cur;
+        var max = maxMatch == null ? 0 : parseInt(maxMatch[1]);
         var curMatch = reg.exec(document.location);
-        if (curMatch == null) {
-            cur = 0;
-        } else {
-            cur = parseInt(curMatch[1]);
-        }
+        var cur = curMatch == null ? 0 : parseInt(curMatch[1]);
 
         //console.log("DEBUG:");
         //console.log(base);
@@ -205,11 +209,8 @@ if (favFilter) {
         document.body.appendChild(ifream);
     }
 
-    var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href :
-        /(.*)&pid=/gm.exec(document.location.href)[1];
+    var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
     if (base.includes("favorites")) {
-
-
         input = document.createElement("input");
         input.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
@@ -230,12 +231,10 @@ if (favFilter) {
         slider.max = "4000";
         slider.value = 1000;
 
-
         var lable = document.createElement("p");
         lable.innerHTML = "Request Speed: " + slider.value + "ms";
         slider.oninput = function() {
             lable.innerHTML = "Request Speed: " + slider.value + "ms";
-
         }
 
         var conatiner = document.createElement("div");
@@ -252,44 +251,30 @@ if (favFilter) {
     };
 }
 
+if (forceDarkTheme) {
+    $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css" title="default"/>');
+}
+
+if (enableFavOnEnter) {
+    document.onkeydown = function(e) {
+        var event = document.all ? window.event : e;
+        switch (e.target.tagName.toLowerCase()) {
+            case "input":
+            case "textarea":
+            case "select":
+            case "button":
+            case "tags":
+            case "comment":
+                break;
+            default:
+                if (event.keyCode == 13) $("#stats + div > ul > li > a:contains('Add to favorites')").click();
+                break;
+        }
+    }
+}
+
 (function() {
     'use strict';
-
-    if (hideBlacklistedThumbnails) {
-        var elements = document.getElementsByClassName("thumb blacklisted-image");
-        while (elements[0]) {
-            elements[0].parentNode.removeChild(elements[0]);
-        }
-    }
-
-    if (forceDarkTheme) {
-
-        // select dark theme
-        //document.querySelector('.form > tbody:nth-child(1) > tr:nth-child(11) > td:nth-child(2) > input:nth-child(3)').click();
-
-        // $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
-
-        ///*
-        // dark theme on main page
-        if (window.location == "https://rule34.xxx/") {
-            // force dark theme
-            $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css?6" title="default" />');
-        }
-
-        // dark theme on other pages
-        $("link").each(function() {
-            var url = this.href;
-            if (url == "https://rule34.xxx/css/desktop.css?6") {
-                // replace white theme with dark theme
-                $(this).attr('href', "https://rule34.xxx/css/desktop_bip.css?6");
-            }
-        });
-
-        //$('div').css({'background-color': '#303a30'});
-        /**/
-    }
-
-
 
     var viewPDepenCSS = "";
     if (useViewportDependentSize) {
@@ -333,26 +318,6 @@ if (favFilter) {
         $("#gelcomVideoContainer").prop("style", "width: " + ($("#stats > ul > li:contains('Size: ')").text().split(": ")[1].split("x")[0]) + "px; max-width: 100%; height: " + ($("#stats > ul > li:contains('Size: ')").text().split("x")[1]) + "px;");
     }
 
-    if (enableFavOnEnter) {
-        document.onkeydown = nextpage;
-
-        function nextpage(e) {
-            var event = document.all ? window.event : e;
-            switch (e.target.tagName.toLowerCase()) {
-                case "input":
-                case "textarea":
-                case "select":
-                case "button":
-                case "tags":
-                case "comment":
-                    break;
-                default:
-                    if (event.keyCode == 13) $("#stats + div > ul > li > a:contains('Add to favorites')").click();
-                    break;
-            }
-        }
-    }
-
     // buttons
     $("#edit_form").prev().before(
         '<img id="btn-like" class="custom-button" alt="like"     src="https://i.imgur.com/TOQLRok.png">' +
@@ -386,5 +351,4 @@ if (favFilter) {
         style.innerHTML = css;
         head.appendChild(style);
     }
-
 })();
