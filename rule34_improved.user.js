@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Rule34.xxx Improved
 // @namespace    UserScript
-// @version      3
+// @version      3.1
 // @description  A lot of improvements for rule34.xxx
 // @author       Hentiedup, 0xC0LD, usnkw
 // @match        https://rule34.xxx/*
@@ -14,8 +14,8 @@
 var autoplayVideos            = false; // (true/false) Automatically play the video
 var defaultVideoVolume        = 1;     // (0-1) 0 = mute, 0.5=50%, 1=100%, etc.
 var useViewportDependentSize  = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
-var ViewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
-var stretchImgVid             = true;  // (true/false) Makes image and video height follow the ViewportDependentHeight regardless of true size. i.e. will stretch if needed.
+var viewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
+var stretchImgVid             = true;  // (true/false) Makes image and video height follow the viewportDependentHeight regardless of true size. i.e. will stretch if needed.
 var trueVideoSize             = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
 var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
 var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
@@ -31,7 +31,7 @@ var favFilter                 = true;  // (true/false) adds a tag searchbox in f
 //		- opt autoplayVideos
 //		- opt defaultVideoVolume
 //		- opt useViewportDependentHeight
-//		- opt ViewportDependentHeight
+//		- opt viewportDependentHeight
 //		- opt stretchImgVid
 //		- opt trueVideoSize
 //	* 0xC0LD
@@ -138,7 +138,7 @@ if (endlessScrolling) {
             document.title = originalTitle;
             ifr.parentNode.removeChild(ifr);
         }
-        document.title = document.title + " - Loading..."
+        document.title = "Loading...";
         document.body.appendChild(ifr);
     }
 
@@ -147,7 +147,7 @@ if (endlessScrolling) {
     });
 }
 
-// TODO: CHECK IN WHICH ORDER IT GETS DISPLAYED
+// TODO: CHECK IN WHICH ORDER IT GETS DISPLAYED, ...
 if (favFilter) {
     async function main_favFilter() {
         var reg = /pid=([0-9]*)/gm;
@@ -282,13 +282,13 @@ if (enableFavOnEnter) {
         #gelcomVideoContainer {
             width: auto !important;
             max-width: 100% !important;
-            height: ` + ViewportDependentHeight + `vh !important;
+            height: ` + viewportDependentHeight + `vh !important;
         }
         ` : "") + `
         #image {
             width: auto !important;
             max-width: 100% !important;
-            ` + (stretchImgVid ? "" : "max-") + `height: ` + ViewportDependentHeight + `vh !important;
+            ` + (stretchImgVid ? "" : "max-") + `height: ` + viewportDependentHeight + `vh !important;
         }
         `;
     }
