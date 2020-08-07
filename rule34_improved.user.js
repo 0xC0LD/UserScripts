@@ -26,7 +26,7 @@ var favFilter                 = true;  // (true/false) adds a tag searchbox in f
 // - Don't touch anything else unless you know what you're doing
 
 // credits:
-// 	* Hentiedupgg
+// 	* Hentiedup
 //		- original author
 //		- opt autoplayVideos
 //		- opt defaultVideoVolume
