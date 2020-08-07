@@ -21,13 +21,13 @@ var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on yo
 var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
 var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
 var endlessScrolling          = true;  // (true/false) endless scrolling
-var endlessScrollingInFav     = false; // (true/false) (must enable endlessScrolling first) enable endless scrolling in favorites (must disabled when searching through favorites with favFilter, otherwise content will conflict)
+var endlessScrollingInFav     = false; // (true/false) (must enable endlessScrolling first) enable endless scrolling in favorites (must disable when searching through favorites with favFilter, otherwise content will conflict)
 var favFilter                 = true;  // (true/false) adds a tag searchbox in favorites
 // - Don't touch anything else unless you know what you're doing
 
 // credits:
 // 	* Hentiedupgg
-//    - original author
+//		- original author
 //		- opt autoplayVideos
 //		- opt defaultVideoVolume
 //		- opt useViewportDependentHeight
