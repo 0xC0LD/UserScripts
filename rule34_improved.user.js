@@ -12,7 +12,7 @@
 
 // ===[ Settings ]===
 var autoplayVideos            = false; // (true/false) Automatically play the video
-var defaultVideoVolume        = 1;     // (0-1) 0 = mute, 0.5=50%, 1=100%, etc.
+var defaultVideoVolume        = 1;     // (0-1)        0 = mute, 0.5=50%, 1=100%, etc.
 var useViewportDependentSize  = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
 var viewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
 var stretchImgVid             = true;  // (true/false) Makes image and video height follow the viewportDependentHeight regardless of true size. i.e. will stretch if needed.
@@ -21,7 +21,7 @@ var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on yo
 var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
 var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
 var endlessScrolling          = true;  // (true/false) endless scrolling
-var endlessScrollingInFav     = false; // (true/false) (must enable endlessScrolling first) enable endless scrolling in favorites (must disable when searching through favorites with favFilter, otherwise content will conflict)
+var endlessScrollingInFav     = false; // (true/false) (must enable endlessScrolling first) enables endless scrolling in favorites (must disable when searching through favorites with favFilter, otherwise content will conflict)
 var favFilter                 = true;  // (true/false) adds a tag searchbox in favorites
 // - Don't touch anything else unless you know what you're doing
 
@@ -45,9 +45,7 @@ var favFilter                 = true;  // (true/false) adds a tag searchbox in f
 //		- opt endlessScrolling
 //		- opt favFilter
 
-function sleep(milliseconds) {
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
-}
+function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
 
 if (hideBlacklistedThumbnails) {
     $(window).on('DOMContentLoaded load', async function() {
@@ -57,9 +55,7 @@ if (hideBlacklistedThumbnails) {
             i++;
             elements[0].parentNode.removeChild(elements[0]);
         }
-        if (i > 0) {
-            console.log("removed content: " + i);
-        }
+        if (i > 0) { console.log("removed content: " + i); }
     });
 }
 
@@ -75,30 +71,19 @@ if (endlessScrolling) {
     async function main_scroll() {
         var reg = /pid=([0-9]*)/gm;
         var add = document.location.href;
-
-        if (!add.includes("s=list") && !(endlessScrollingInFav && add.includes("index.php?page=favorites&s=view"))) {
-            return;
-        }
+        if (!add.includes("s=list") && !(endlessScrollingInFav && add.includes("index.php?page=favorites&s=view"))) { return; }
 
         var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
         var step = base.includes("favorites") ? 50 : 42;
-
 
         var el = step == 50 ? document.getElementsByName("lastpage")[0] : document.getElementsByTagName("a")[document.getElementsByTagName("a").length - 2];
         var text = step == 50 ? el.attributes[1].nodeValue : el.href;
         var maxMatch = reg.exec(text);
         var max = maxMatch == null ? 0 : max = parseInt(maxMatch[1]);
 
-
         var curMatch = /pid=([0-9]*)/gm.exec(add);
         var cur = curMatch == null ? 0 : parseInt(curMatch[1]);
-
-        //console.log("DEBUG:");
-        //console.log(base);
-        //console.log("max: " + max);
-        //console.log("cur: " + cur);
-        //console.log("step: " + step);
-
+        
         var loadNext = true;
         $(window).on('DOMContentLoaded load resize scroll', async function() {
             //if(cur >= max){return;}
@@ -114,23 +99,21 @@ if (endlessScrolling) {
     };
 
     var originalTitle = document.title;
-
+    
     function getImagesFromUrl(url) {
         var ifr = document.createElement("iframe");
         ifr.style = "width:0; height:0; border:0; border:none";
         ifr.src = url;
         ifr.onload = function() {
-            var images = ifr.contentWindow.document.getElementsByTagName("img");
+          	var images = Array.prototype.slice.call(ifr.contentWindow.document.getElementsByTagName("img"), 0);
+          	images.reverse();
             //console.log(images);
             var t = 0;
             var g = 0;
-            for(i = images.length-1; i >= 0; i--) {
-            //for (i = 0; i < images.length; i++) { /// TODO: FIX THE ORDER
+            for(i = images.length - 1; i >= 0; i--) {
                 if (images[i].parentNode.parentNode.tagName == "SPAN") {
                     t++;
-                    if (hideBlacklistedThumbnails && images[i].parentNode.parentNode.className == "thumb blacklisted-image") {
-                        continue;
-                    }
+                    if (hideBlacklistedThumbnails && images[i].parentNode.parentNode.className == "thumb blacklisted-image") { continue; }
                     document.getElementById("paginator").parentNode.insertBefore(images[i].parentNode.parentNode, document.getElementById("paginator"));
                     g++;
                 }
@@ -143,9 +126,7 @@ if (endlessScrolling) {
         document.body.appendChild(ifr);
     }
 
-    $(document).ready(function() {
-        main_scroll();
-    });
+    $(document).ready(function() { main_scroll(); });
 }
 
 // TODO: CHECK IN WHICH ORDER IT GETS DISPLAYED, ...
@@ -153,10 +134,8 @@ if (favFilter) {
     async function main_favFilter() {
         var reg = /pid=([0-9]*)/gm;
         var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
-        if (!base.includes("favorites")) {
-            return console.log("not a favorites page");
-        };
-
+        if (!base.includes("favorites")) { return console.log("not a favorites page"); };
+        
         var step = 50;
         var max;
         var el = document.getElementsByName("lastpage")[0];
@@ -164,18 +143,9 @@ if (favFilter) {
         var max = maxMatch == null ? 0 : parseInt(maxMatch[1]);
         var curMatch = reg.exec(document.location);
         var cur = curMatch == null ? 0 : parseInt(curMatch[1]);
-
-        //console.log("DEBUG:");
-        //console.log(base);
-        //console.log("max: " + max);
-        //console.log("cur: " + cur);
-        //console.log("step: " + step);
-        //console.log("match: " + input.value);
-
+        
         var span = document.getElementsByTagName("span");
-        for (i = span.length - 1; i >= 0; i--) {
-            span[i].parentNode.removeChild(span[i]);
-        }
+        for (i = span.length - 1; i >= 0; i--) { span[i].parentNode.removeChild(span[i]); }
         for (; cur <= max; cur += step) {
             getImagesFromUrl(base + "&pid=" + cur, input.value.split(" "));
             await sleep(slider.value);
@@ -188,23 +158,12 @@ if (favFilter) {
         ifream.onload = function() {
             var toAdd = [];
             var images = ifream.contentWindow.document.getElementsByTagName("img");
-            //console.log(images);
-            //console.log(match);
             for (i = images.length - 1; i >= 0; i--) {
                 var addImage = true;
-                for (j = 0; j < match.length; j++) {
-                    if (!images[i].title.includes(match[j])) {
-                        addImage = false;
-                    }
-                }
-                if (addImage) {
-                    //console.log("found " + images[i].title);
-                    toAdd.push(images[i].parentNode.parentNode);
-                }
+                for (j = 0; j < match.length; j++) { if (!images[i].title.includes(match[j])) { addImage = false; } }
+                if (addImage) { toAdd.push(images[i].parentNode.parentNode); }
             }
-            for (i = toAdd.length - 1; i >= 0; i--) {
-                document.getElementById("paginator").parentNode.insertBefore(toAdd[i], document.getElementById("paginator"));
-            }
+            for (i = toAdd.length - 1; i >= 0; i--) { document.getElementById("paginator").parentNode.insertBefore(toAdd[i], document.getElementById("paginator")); }
             ifream.parentNode.removeChild(ifream);
         }
         document.body.appendChild(ifream);
@@ -234,9 +193,7 @@ if (favFilter) {
 
         var lable = document.createElement("p");
         lable.innerHTML = "Request Speed: " + slider.value + "ms";
-        slider.oninput = function() {
-            lable.innerHTML = "Request Speed: " + slider.value + "ms";
-        }
+        slider.oninput = function() { lable.innerHTML = "Request Speed: " + slider.value + "ms"; }
 
         var conatiner = document.createElement("div");
         conatiner.style.margin = "1em";
@@ -246,15 +203,11 @@ if (favFilter) {
         conatiner.appendChild(lable);
 
         document.getElementsByTagName("span")[0].parentNode.insertBefore(conatiner, document.getElementsByTagName("span")[0]);
-        button.onclick = function() {
-            main_favFilter();
-        }
+        button.onclick = function() { main_favFilter(); }
     };
 }
 
-if (forceDarkTheme) {
-    $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css" title="default"/>');
-}
+if (forceDarkTheme) { $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css" title="default"/>'); }
 
 if (enableFavOnEnter) {
     document.onkeydown = function(e) {
@@ -311,9 +264,7 @@ if (enableFavOnEnter) {
         ` + viewPDepenCSS + ``);
 
     $("#gelcomVideoPlayer").prop("volume", defaultVideoVolume);
-    if (autoplayVideos) {
-        $("#gelcomVideoPlayer").prop("autoplay", true);
-    }
+    if (autoplayVideos) { $("#gelcomVideoPlayer").prop("autoplay", true); }
 
     if (!stretchImgVid && trueVideoSize) {
         $("#gelcomVideoContainer").prop("style", "width: " + ($("#stats > ul > li:contains('Size: ')").text().split(": ")[1].split("x")[0]) + "px; max-width: 100%; height: " + ($("#stats > ul > li:contains('Size: ')").text().split("x")[1]) + "px;");
@@ -328,25 +279,15 @@ if (enableFavOnEnter) {
     );
 
     // button click events
-    $("#btn-like").click(function() {
-        $("#stats > ul > li:contains('(vote up)') > a:contains('up')").click();
-    });
-    $("#btn-fav").click(function() {
-        $("#stats + div > ul > li > a:contains('Add to favorites')").click();
-    });
-    $("#btn-prev").click(function() {
-        $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click();
-    });
-    $("#btn-next").click(function() {
-        $("#stats + div + div + div + div > ul > li > a:contains('Next')").click();
-    });
+    $("#btn-like").click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')")        .click(); });
+    $("#btn-fav") .click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')")          .click(); });
+    $("#btn-prev").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
+    $("#btn-next").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')")    .click(); });
 
     function addGlobalStyle(css) {
         var head, style;
         head = document.getElementsByTagName('head')[0];
-        if (!head) {
-            return;
-        }
+        if (!head) { return; }
         style = document.createElement('style');
         style.type = 'text/css';
         style.innerHTML = css;
