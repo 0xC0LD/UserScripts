@@ -124,7 +124,8 @@ if (endlessScrolling) {
             //console.log(images);
             var t = 0;
             var g = 0;
-            for (i = 0; i < images.length; i++) {
+            for(i = images.length-1; i >= 0; i--) {
+            //for (i = 0; i < images.length; i++) { /// TODO: FIX THE ORDER
                 if (images[i].parentNode.parentNode.tagName == "SPAN") {
                     t++;
                     if (hideBlacklistedThumbnails && images[i].parentNode.parentNode.className == "thumb blacklisted-image") {
