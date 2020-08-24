@@ -123,23 +123,21 @@ if (endlessScrolling) {
         document.body.appendChild(ifr);
     }
 
-    $(document).ready(function() {
-        main_scroll();
-    });
+    $(document).ready(function() { main_scroll(); });
 }
 
 // TODO: check order
 // TODO: clean up the code (var names, etc.)
 if (favFilter) {
-  	var btn_filter;
-  	var txt_curmax;
-  	var txt_status;
+    var btn_filter;
+    var txt_curmax;
+    var txt_status;
     var txt_imageCount;
-  
+
     var imagesAdded = 0;
-  	var shouldStop = false;
-  	
-  	// start search
+    var shouldStop = false;
+
+    // start search
     async function main_favFilter() {
         var reg = /pid=([0-9]*)/gm;
         var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
@@ -156,20 +154,20 @@ if (favFilter) {
 
         // remove all spans
         var elements = document.getElementsByTagName("span");
-       	while (elements[0]) { elements[0].parentNode.removeChild(elements[0]); }
+        while (elements[0]) { elements[0].parentNode.removeChild(elements[0]); }
         var elements2 = document.getElementsByTagName("br");
         while (elements2[0]) { elements2[0].parentNode.removeChild(elements2[0]); }
 
         // start search
         for (; cur <= max; cur += step) {
-          	txt_curmax.innerHTML = cur + "/" + max + " (" + cur/step + "/" + max/step + ")";
+            txt_curmax.innerHTML = cur + "/" + max + " (" + cur / step + "/" + max / step + ")";
             getImagesFromUrl(base + "&pid=" + cur, input.value.split(" "));
             await sleep(slider.value);
-          	if (shouldStop) { shouldStop = false; return; }
+            if (shouldStop) { shouldStop = false; return; }
         }
     };
 
-  	// load images from url
+    // load images from url
     function getImagesFromUrl(url, match) {
         var ifr = document.createElement("iframe");
         ifr.style = "display:none; width:0; height:0; border:0; border:none";
@@ -217,13 +215,13 @@ if (favFilter) {
         btn1.title = "Start search"
         btn1.innerHTML = "Filter";
         btn1.onclick = function() { main_favFilter(); }
-        
+
         // stop button
         var btn2 = document.createElement("button");
         btn2.title = "Stop search";
         btn2.innerHTML = "Stop";
         btn2.onclick = function() { shouldStop = true; }
-        
+
         // clear images button
         var btn3 = document.createElement("button");
         btn3.title = "Clear search history";
@@ -236,26 +234,26 @@ if (favFilter) {
             imagesAdded = 0;
             document.title = originalTitle;
         }
-        
+
         // help button
         var btn4 = document.createElement("button");
         btn4.title = "Show help";
         btn4.innerHTML = "Help";
         btn4.onclick = function() {
-        	alert(
-                  "[TEXTBOX] - put tags you want to search for, in your favorites\n"
-             	+ "[Filter] - find posts with tags specified in the textbox\n"
-            	+ "[Stop] - stop searching\n"
-            	+ "[Clear] - clear images that are displayed (it doesn't remove them from favorites)\n"
-            	+ "[Help] - display this msg\n"
-            	+ "* The slider sets the time between requests.\n"
-                + "* This is not an officially supported service.\n"
-                + "* If you make too many requests, you might get temporarily blocked.\n"
-                + "* The recommended time slider delay is 1000ms\n"
-                + "* If the search takes too long try decreasing the time between requests."
-          );
+            alert(
+                "[TEXTBOX] - put tags you want to search for, in your favorites\n" +
+                "[Filter] - find posts with tags specified in the textbox\n" +
+                "[Stop] - stop searching\n" +
+                "[Clear] - clear images that are displayed (it doesn't remove them from favorites)\n" +
+                "[Help] - display this msg\n" +
+                "* The slider sets the time between requests.\n" +
+                "* This is not an officially supported service.\n" +
+                "* If you make too many requests, you might get temporarily blocked.\n" +
+                "* The recommended time slider delay is 1000ms\n" +
+                "* If the search takes too long try decreasing the time between requests."
+            );
         }
-        
+
         // slider for speed
         var slider = document.createElement("input");
         slider.type = "range";
@@ -269,7 +267,7 @@ if (favFilter) {
         p1.style = "margin: 0px";
         p1.innerHTML = "Request Speed: " + slider.value + "ms";
         slider.oninput = function() { p1.innerHTML = "Request Speed: " + slider.value + "ms"; }
-        
+
         // current / max
         var p2 = document.createElement("p");
         p2.id = "curmax";
@@ -290,23 +288,23 @@ if (favFilter) {
         cont.style.margin = "1em";
         cont.appendChild(input);
         cont.appendChild(btn1);
-      	cont.appendChild(btn2);
-      	cont.appendChild(btn3);
-      	cont.appendChild(btn4);
+        cont.appendChild(btn2);
+        cont.appendChild(btn3);
+        cont.appendChild(btn4);
         cont.appendChild(slider);
         cont.appendChild(p1);
         cont.appendChild(p2);
         cont.appendChild(p3);
-      	cont.appendChild(p4);
+        cont.appendChild(p4);
 
         // insert controls
         document.getElementsByTagName("span")[0].parentNode.insertBefore(cont, document.getElementsByTagName("span")[0]);
-        
+
         // set element*
-      	btn_filter     = document.getElementById("filterButton");
-      	txt_curmax     = document.getElementById("curmax");
-      	txt_status     = document.getElementById("status");
-      	txt_imageCount = document.getElementById("imageCount");
+        btn_filter = document.getElementById("filterButton");
+        txt_curmax = document.getElementById("curmax");
+        txt_status = document.getElementById("status");
+        txt_imageCount = document.getElementById("imageCount");
     };
 }
 
@@ -363,12 +361,11 @@ if (enableFavOnEnter) {
         ` + viewPDepenCSS + ``);
 
     $("#gelcomVideoPlayer").prop("volume", defaultVideoVolume);
-    if (autoplayVideos) {
-        $("#gelcomVideoPlayer").prop("autoplay", true);
-    }
-
+    if (autoplayVideos) { $("#gelcomVideoPlayer").prop("autoplay", true); }
+    
     if (!stretchImgVid && trueVideoSize) {
-        $("#gelcomVideoContainer").prop("style", "width: " + ($("#stats > ul > li:contains('Size: ')").text().split(": ")[1].split("x")[0]) + "px; max-width: 100%; height: " + ($("#stats > ul > li:contains('Size: ')").text().split("x")[1]) + "px;");
+        $("#gelcomVideoContainer").prop("style", "width: " + ($("#stats > ul > li:contains('Size: ')").text().split(": ")[1].split("x")[0]) + 
+                                        "px; max-width: 100%; height: " + ($("#stats > ul > li:contains('Size: ')").text().split("x")[1]) + "px;");
     }
 
     // buttons
