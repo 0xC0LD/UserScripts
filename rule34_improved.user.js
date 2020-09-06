@@ -6,23 +6,26 @@
 // @author       Hentiedup, 0xC0LD, usnkw
 // @match        https://rule34.xxx/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
-// @grant        none
+// @grant        GM_addStyle
+// @grant        GM_getResourceText
 // @icon         data:image/ico;base64,AAABAAEAEBAAAAEAIABeAQAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAAQAAAAEAgGAAAAH/P/YQAAAAlwSFlzAAALEwAACxMBAJqcGAAAARBJREFUOMudkjFOw0AQRd86mxugNCTyRaxIkZyCii5FOm5gi3NY5gacgcqFKX0R5NBE3CDgT7XW2llsYCTLO//P35n9u0aSedq8dvwjsjaNrBNnbdoTxhgAynUdEvU8m7qLfNB9kgDIT/srsR/d4pPI7zgzbrDO+kkRV38Su3OqXNfyAxDQ4y4v4mqQA7Jj4wAkYYwhP+3JUO+JzzuNnTv7eHS3+cCDrE3JTdgDH3t8uwub6F/d1K2MGxRxhZ0ShSZydY6z7sWNH00RV7y8Pw+w+9uHa65c19pFR300XwJ0bi4CtLWHfj2FRW73m2TBubmwSpZs7QGAVbKcx9wEv+kWwpBkdtGxL3B/f/0TJsl8A8Ga1pJm8pdUAAAAAElFTkSuQmCC
 // ==/UserScript==
 
 // ===[ Settings ]===
-var autoplayVideos = false;           // (true/false) Automatically play the video
-var defaultVideoVolume = 1;           // (0-1)        0 = mute, 0.5=50%, 1=100%, etc.
-var useViewportDependentSize = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
-var viewportDependentHeight = 70;     // (1-100)      the size used by above. (in %)
-var stretchImgVid = true;             // (true/false) Makes image and video height follow the viewportDependentHeight regardless of true size. i.e. will stretch if needed.
-var trueVideoSize = false;            // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
-var enableFavOnEnter = true;          // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
-var hideBlacklistedThumbnails = true; // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
-var forceDarkTheme = true;            // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
-var endlessScrolling = true;          // (true/false) endless scrolling
-var endlessScrollingInFav = false;    // (true/false) (must enable endlessScrolling first) enables endless scrolling in favorites (must disable when searching through favorites with favFilter, otherwise content will conflict)
-var favFilter = true;                 // (true/false) adds a tag searchbox in favorites
+var autoplayVideos            = true;  // (true/false) Automatically play the video
+var defaultVideoVolume        = 1;     // (0-1)        0 = mute, 0.5=50%, 1=100%, etc.
+var useViewportDependentSize  = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
+var viewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
+var stretchImgVid             = true;  // (true/false) Makes image and video height follow the viewportDependentHeight regardless of true size. i.e. will stretch if needed.
+var trueVideoSize             = false; // (true/false) Resizes videos to their true size (unless overriden by stretchImgVid)
+var enableFavOnEnter          = true;  // (true/false) Use the "ENTER" key on your keyboard to add a post to your favorites
+var hideBlacklistedThumbnails = true;  // (true/false) Hide blacklisted thumbnails on the front page (https://rule34.xxx/index.php?page=post&s=list&tags=all)
+var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme on every page, even if light theme is set in options
+var betterDarkTheme           = true;  // (true/false) Use a custom CSS dark theme with the rule34's dark theme (must enable forceDarkTheme)
+var removeHentaiClickerGame   = true;  // (true/false) Remove the hentai clicker game ad
+var endlessScrolling          = true;  // (true/false) Enable endless scrolling - when you get to the bottom of the current page it will automatically append the content from the next page on the current page
+var endlessScrollingInFav     = false; // (true/false) Enables endless scrolling in favorites, must enable endlessScrolling first, must disable when searching through favorites with favFilter, otherwise content will conflict
+var favFilter                 = true;  // (true/false) Adds a tag searchbox in favorites
 // - Don't touch anything else unless you know what you're doing
 
 // credits:
@@ -40,10 +43,75 @@ var favFilter = true;                 // (true/false) adds a tag searchbox in fa
 //		- opt enableFavOnEnter
 //		- opt hideBlacklistedThumbnails
 //		- opt forceDarkTheme
+//		- opt betterDarkTheme
+//		- opt removeHentaiClickerGame
 //		- opt endlessScrollingInFav
 //	* usnkw
 //		- opt endlessScrolling
 //		- opt favFilter
+
+
+var customCSS = `
+* {
+    --c-bg: #101010;
+    --c-bg-alt: #101010;
+    --c-bg-highlight: #202020;
+}
+
+body { background-image: none; color: white; background-color: #101010 }
+
+table.highlightable td { border-color: #023C00; }
+
+input[type="text"], input[type="password"], input[type="email"], textarea, select {
+    color: lime;
+    background-color: black;
+    border-color: green;
+    border-style:solid;
+    margin: 1px;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, textarea:focus, select:focus {
+    background-color: #101010 !important;
+}
+
+.awesomplete [hidden] { display: none }
+.awesomplete .visually-hidden { position: absolute; clip: rect(0,0,0,0) }
+.awesomplete { display: inline-block; position: relative }
+.awesomplete>input { display: block }
+.awesomplete>ul {
+    position:absolute;
+    left:0;
+    right:0;
+    z-index:1;
+    min-width:100%;
+    box-sizing: border-box;
+    list-style: none;
+    padding:0;
+    margin:0;
+    background: black;
+}
+.awesomplete>ul:empty { display:none }
+.awesomplete>ul {
+    margin: 0;
+    color: hotpink;
+    background: linear-gradient(to top left, #002404, black);
+    border-color: lime;
+    border-width: 1px;
+    text-shadow:none
+}
+@supports(transform:scale(0)) {
+    .awesomplete>ul { transition:.3s cubic-bezier(.95,.05,.8,.04); transform-origin:1.43em -.43em; }
+    .awesomplete>ul[hidden],
+    .awesomplete>ul:empty { opacity:0; transform:scale(0); display:block; ransition-timing-function:ease; }
+}
+.awesomplete>ul:before { display: none }
+.awesomplete>ul>li                       { color: hotpink; position:relative; padding:.2em .5em; cursor:pointer }
+.awesomplete>ul>li:hover                 { color: hotpink; background: indigo; }
+.awesomplete>ul>li[aria-selected=true]   { color: hotpink; background: indigo; border-style: solid; border-color: lime; border-width: 1px; }
+.awesomplete mark                        { color: lime; background: transparent; }
+.awesomplete li:hover mark               { color: lime; background: transparent; }
+.awesomplete li[aria-selected=true] mark { color: lime; background: transparent; }
+`;
 
 function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
 
@@ -52,9 +120,9 @@ var originalTitle = document.title;
 if (hideBlacklistedThumbnails) {
     $(window).on('DOMContentLoaded load', async function() {
         var elements = document.getElementsByClassName("thumb blacklisted-image");
-        var i = 0;
-        while (elements[0]) { i++; elements[0].parentNode.removeChild(elements[0]); }
-        if (i > 0) { console.log("removed content: " + i); }
+        //var i = 0;
+        while (elements[0]) { /* i++; */ elements[0].parentNode.removeChild(elements[0]); }
+        //if (i > 0) { console.log("removed content: " + i); }
     });
 }
 
@@ -89,7 +157,7 @@ if (endlessScrolling) {
             if ($('#paginator').isInViewport() && loadNext) {
                 loadNext = false;
                 cur += step;
-                console.log("loading: " + cur);
+                //console.log("loading: " + cur);
                 getImagesFromUrl(base + "&pid=" + cur);
                 await sleep(1000);
                 loadNext = true;
@@ -115,7 +183,7 @@ if (endlessScrolling) {
                     g++;
                 }
             }
-            console.log("images: " + g + "/" + t + " (-" + (t - g) + ")");
+            //console.log("images: " + g + "/" + t + " (-" + (t - g) + ")");
             ifr.parentNode.removeChild(ifr);
             document.title = originalTitle;
         }
@@ -175,7 +243,7 @@ if (favFilter) {
         ifr.onload = function() {
             var toAdd = [];
             var images = ifr.contentWindow.document.getElementsByTagName("img");
-            console.log(images);
+            //console.log(images);
             for (i = images.length - 1; i >= 0; i--) {
                 var addImage = true;
                 for (j = 0; j < match.length; j++) { if (!images[i].title.includes(match[j])) { addImage = false; } }
@@ -308,7 +376,29 @@ if (favFilter) {
     };
 }
 
-if (forceDarkTheme) { $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css" title="default"/>'); }
+if (removeHentaiClickerGame) {
+    //$(".content > div:nth-child(10)").remove(); // unsafe version of the same thing
+    var items = document.getElementsByTagName("a");
+    for (i = items.length - 1; i >= 0; i--) {
+        if (items[i].href.includes("clicker")) {
+            //console.log("removed: ")
+            //console.log(items[i])
+            items[i].remove();
+        }
+    }
+}
+
+if (forceDarkTheme) {
+
+    // remove deafult css (desktop.css)
+    document.querySelectorAll('link[rel=stylesheet]').forEach(function(node) { if (node.href.includes("desktop.css")) { node.disabled = true; } });
+
+    // add the dark theme css
+    $('head').append('<link rel="stylesheet" type="text/css" media="screen" href="https://rule34.xxx/css/desktop_bip.css" title="default"/>');
+
+    // nice.
+    if (betterDarkTheme) { GM_addStyle(customCSS) }
+}
 
 if (enableFavOnEnter) {
     document.onkeydown = function(e) {
