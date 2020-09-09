@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 // ===[ Settings ]===
-var autoplayVideos            = true;  // (true/false) Automatically play the video
+var autoplayVideos            = false; // (true/false) Automatically play the video
 var defaultVideoVolume        = 1;     // (0-1)        0 = mute, 0.5=50%, 1=100%, etc.
 var useViewportDependentSize  = true;  // (true/false) Makes the max-height of all images and videos X% of the viewport (inner window of the browser) width/height.  
 var viewportDependentHeight   = 70;    // (1-100)      the size used by above. (in %)
