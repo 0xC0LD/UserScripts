@@ -24,7 +24,7 @@ var forceDarkTheme            = true;  // (true/false) Force rule34's dark theme
 var betterDarkTheme           = true;  // (true/false) Use a custom CSS dark theme with the rule34's dark theme (must enable forceDarkTheme)
 var removeHentaiClickerGame   = true;  // (true/false) Remove the hentai clicker game ad
 var endlessScrolling          = true;  // (true/false) Enable endless scrolling - when you get to the bottom of the current page it will automatically append the content from the next page on the current page
-var endlessScrollingInFav     = false; // (true/false) Enables endless scrolling in favorites, must enable endlessScrolling first, must disable when searching through favorites with favFilter, otherwise content will conflict
+var endlessScrollingInFav     = true;  // (true/false) Enables endless scrolling in favorites, must enable endlessScrolling first, must disable when searching through favorites with favFilter, otherwise content will conflict
 var favFilter                 = true;  // (true/false) Adds a tag searchbox in favorites
 // - Don't touch anything else unless you know what you're doing
 
@@ -127,6 +127,22 @@ if (hideBlacklistedThumbnails) {
 }
 
 if (endlessScrolling) {
+    // scroll checkbox
+    var checkbox = document.createElement('input');
+    checkbox.type = "checkbox";
+    checkbox.name = "scroll_cb";
+    checkbox.id = "endlessScroll_cb";
+    checkbox.checked = endlessScrolling;
+    checkbox.title = "Enable endless scrolling"
+    // append checkbox to bar
+    //document.getElementById("subnavbar").append(checkbox);
+    
+    var div = document.createElement("div");
+    div.style = "position: fixed; display: block; width: 10px; height: 10px; top: 5px; right: 20px; bottom: 0; z-index: 2; cursor: pointer;";
+    div.append(checkbox);
+  
+    document.body.appendChild(div);
+    
     $.fn.isInViewport = function() {
         var elementTop = $(this).offset().top;
         var elementBottom = elementTop + $(this).outerHeight();
@@ -153,6 +169,9 @@ if (endlessScrolling) {
 
         var loadNext = true;
         $(window).on('DOMContentLoaded load resize scroll', async function() {
+          
+            if (!checkbox.checked) { return; }
+          
             //if(cur >= max){return;}
             if ($('#paginator').isInViewport() && loadNext) {
                 loadNext = false;
