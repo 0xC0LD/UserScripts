@@ -132,14 +132,21 @@ if (endlessScrolling && (document.location.href.includes("s=list") || (endlessSc
     checkbox.type = "checkbox";
     checkbox.name = "scroll_cb";
     checkbox.id = "endlessScroll_cb";
+    checkbox.style = "position: fixed; display: block; top: 5px; right: 5px; bottom: 0; z-index: 2; cursor: pointer;";
     checkbox.checked = endlessScrolling;
     checkbox.title = "Enable endless scrolling"
     // append checkbox to bar
     //document.getElementById("subnavbar").append(checkbox);
+  
+    var infoScroll = document.createElement("p");
+    infoScroll.id = "curpage";
+    infoScroll.style = "position: fixed; display: block; top: 30px; right: 5px; bottom: 0; z-index: 2; cursor: pointer;";
+    infoScroll.innerHTML = "";
     
     var div = document.createElement("div");
-    div.style = "position: fixed; display: block; width: 10px; height: 10px; top: 5px; right: 20px; bottom: 0; z-index: 2; cursor: pointer;";
+    div.style = "position: fixed; display: block; width: auto; height: auto; top: 5px; right: 10px; bottom: 0; z-index: 2";
     div.append(checkbox);
+    div.append(infoScroll);
   
     document.body.appendChild(div);
     
@@ -175,9 +182,12 @@ if (endlessScrolling && (document.location.href.includes("s=list") || (endlessSc
             if ($('#paginator').isInViewport() && loadNext) {
                 loadNext = false;
                 cur += step;
-                //console.log("loading: " + cur);
+                var strr = cur + " (" + ((cur+step)/step) + ")";
+                infoScroll.innerHTML = "..." + strr;
                 getImagesFromUrl(base + "&pid=" + cur);
+                
                 await sleep(1000);
+                infoScroll.innerHTML = strr;
                 loadNext = true;
             }
         });
