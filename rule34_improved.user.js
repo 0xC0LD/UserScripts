@@ -157,7 +157,9 @@ if (endlessScrolling && (document.location.href.includes("s=list") || (endlessSc
         var viewportBottom = viewportTop + $(window).height();
         return elementBottom > viewportTop && elementTop < viewportBottom;
     };
-
+    
+    var reachedTheEnd = false;
+    
     async function main_scroll() {
         var reg = /pid=([0-9]*)/gm;
         var add = document.location.href;
@@ -175,25 +177,23 @@ if (endlessScrolling && (document.location.href.includes("s=list") || (endlessSc
 
         var loadNext = true;
         $(window).on('DOMContentLoaded load resize scroll', async function() {
-          
+            if (reachedTheEnd) { return; }
             if (!checkbox.checked) { return; }
           
             //if(cur >= max){return;}
             if ($('#paginator').isInViewport() && loadNext) {
                 loadNext = false;
                 cur += step;
-                var strr = cur + " (" + ((cur+step)/step) + ")";
-                infoScroll.innerHTML = "..." + strr;
-                getImagesFromUrl(base + "&pid=" + cur);
-                
+                getImagesFromUrl(base, step, cur);
                 await sleep(1000);
-                infoScroll.innerHTML = strr;
                 loadNext = true;
             }
         });
     };
 
-    function getImagesFromUrl(url) {
+    function getImagesFromUrl(base, step, cur) {
+        var url = base + "&pid=" + cur;
+        
         var ifr = document.createElement("iframe");
         ifr.style = "display:none; width:0; height:0; border:0; border:none";
         ifr.src = url;
@@ -214,7 +214,11 @@ if (endlessScrolling && (document.location.href.includes("s=list") || (endlessSc
             //console.log("images: " + g + "/" + t + " (-" + (t - g) + ")");
             ifr.parentNode.removeChild(ifr);
             document.title = originalTitle;
+            
+            if (t == 0) { reachedTheEnd = true; return; } // no images added, this is the end
+            infoScroll.innerHTML = cur + " (" + ((cur+step)/step) + ")";
         }
+        
         document.title = "Loading...";
         document.body.appendChild(ifr);
     }
