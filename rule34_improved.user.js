@@ -450,69 +450,75 @@ if (enableFavOnEnter) {
     }
 }
 
-(function() {
-    'use strict';
-
-    var viewPDepenCSS = "";
-    if (useViewportDependentSize) {
-        viewPDepenCSS = (stretchImgVid ? `
-        #gelcomVideoContainer {
-            width: auto !important;
-            max-width: 100% !important;
-            height: ` + viewportDependentHeight + `vh !important;
-        }
-        ` : "") + `
-        #image {
-            width: auto !important;
-            max-width: 100% !important;
-            ` + (stretchImgVid ? "" : "max-") + `height: ` + viewportDependentHeight + `vh !important;
-        }
-        `;
-    }
-
-    addGlobalStyle(`
-        #content > #post-view > #right-col > div > img.custom-button {
-            cursor: pointer;
-            width: 50px;
-            padding: 3px;
-            margin: 0;
-            border-radius: 20px;
-        }
-        .custom-button:hover  { background-color: rgba(255,255,255,.2); }
-        .custom-button:active { background-color: rgba(255,255,255,1);  }
-        ` + viewPDepenCSS + ``);
-
-    $("#gelcomVideoPlayer").prop("volume", defaultVideoVolume);
-    if (autoplayVideos) { $("#gelcomVideoPlayer").prop("autoplay", true); }
+if (document.location.href.includes("view")) {
+    (function() {
+        'use strict';
     
-    if (!stretchImgVid && trueVideoSize) {
-        $("#gelcomVideoContainer").prop("style", "width: " + ($("#stats > ul > li:contains('Size: ')").text().split(": ")[1].split("x")[0]) + 
-                                        "px; max-width: 100%; height: " + ($("#stats > ul > li:contains('Size: ')").text().split("x")[1]) + "px;");
-    }
-
-    // buttons
-    $("#edit_form").prev().before(
-        '<img id="btn-like"  class="custom-button" alt="like"     src="https://i.imgur.com/TOQLRok.png">' +
-        '<img id="btn-fav"   class="custom-button" alt="favorite" src="https://i.imgur.com/dTpBrIj.png">' +
-        '<img id="btn-close" class="custom-button" alt="close"    src="https://i.imgur.com/k5r0EVo.png">' +
-        '<img id="btn-prev"  class="custom-button" alt="previous" src="https://i.imgur.com/Qh5DWPR.png">' +
-        '<img id="btn-next"  class="custom-button" alt="next"     src="https://i.imgur.com/v6rmImf.png">'
-    );
-
-    // button click events
-    $("#btn-like") .click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')")        .click(); });
-    $("#btn-fav")  .click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')")          .click(); });
-    $("#btn-close").click(function() { window.close();                                                                 });
-    $("#btn-prev") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
-    $("#btn-next") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')")    .click(); });
-
-    function addGlobalStyle(css) {
-        var head, style;
-        head = document.getElementsByTagName('head')[0];
-        if (!head) { return; }
-        style = document.createElement('style');
-        style.type = 'text/css';
-        style.innerHTML = css;
-        head.appendChild(style);
-    }
-})();
+        var viewPDepenCSS = "";
+        if (useViewportDependentSize) {
+            viewPDepenCSS = (stretchImgVid ? `
+            #gelcomVideoContainer {
+                width: auto !important;
+                max-width: 100% !important;
+                height: ` + viewportDependentHeight + `vh !important;
+            }
+            ` : "") + `
+            #image {
+                width: auto !important;
+                max-width: 100% !important;
+                ` + (stretchImgVid ? "" : "max-") + `height: ` + viewportDependentHeight + `vh !important;
+            }
+            `;
+        }
+    
+        addGlobalStyle(`
+            button.custom-button {
+                background-color: transparent;
+                cursor: pointer;
+                width: auto;
+                padding: 3px;
+                margin: 0;
+                border-radius: 20px;
+            }
+            .custom-button:hover  { background-color: rgba(255,255,255,.2); }
+            .custom-button:active { background-color: rgba(255,255,255,1);  }
+            ` + viewPDepenCSS + ``);
+    
+        $("#gelcomVideoPlayer").prop("volume", defaultVideoVolume);
+        if (autoplayVideos) { $("#gelcomVideoPlayer").prop("autoplay", true); }
+        
+        if (!stretchImgVid && trueVideoSize) {
+            $("#gelcomVideoContainer").prop("style", "width: " + ($("#stats > ul > li:contains('Size: ')").text().split(": ")[1].split("x")[0]) + 
+                                            "px; max-width: 100%; height: " + ($("#stats > ul > li:contains('Size: ')").text().split("x")[1]) + "px;");
+        }
+        
+        $("#subnavbar").append('<div id="postbar" style="margin: 0; padding 30px; border: solid 1px var(--c-link-soft); display: inline-block; width: auto; background-color: var(--c-bg-highlight);">');
+        
+        // buttons
+        $("#postbar").append(
+            '<button id="btn-like"  class="custom-button" alt="like">     <img style="width: 10px" src="https://i.imgur.com/TOQLRok.png"/> like</button>' +
+            '<button id="btn-fav"   class="custom-button" alt="favorite"> <img style="width: 10px" src="https://i.imgur.com/dTpBrIj.png"/> fav</button>' +
+            '<button id="btn-close" class="custom-button" alt="close">    <img style="width: 10px" src="https://i.imgur.com/k5r0EVo.png"/> close</button>' +
+            '<button id="btn-prev"  class="custom-button" alt="previous"> <img style="width: 10px" src="https://i.imgur.com/Qh5DWPR.png"/> prev</button>' +
+            '<button id="btn-next"  class="custom-button" alt="next">     <img style="width: 10px" src="https://i.imgur.com/v6rmImf.png"/> next</button>'
+        );
+        
+    
+        // button click events
+        $("#btn-like") .click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')")        .click(); });
+        $("#btn-fav")  .click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')")          .click(); });
+        $("#btn-close").click(function() { window.close();                                                                 });
+        $("#btn-prev") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
+        $("#btn-next") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')")    .click(); });
+    
+        function addGlobalStyle(css) {
+            var head, style;
+            head = document.getElementsByTagName('head')[0];
+            if (!head) { return; }
+            style = document.createElement('style');
+            style.type = 'text/css';
+            style.innerHTML = css;
+            head.appendChild(style);
+        }
+    })();
+}
