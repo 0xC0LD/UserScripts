@@ -214,7 +214,7 @@ if (endlessScrolling && (document.location.href.includes("s=list") || (endlessSc
             //console.log("images: " + g + "/" + t + " (-" + (t - g) + ")");
             ifr.parentNode.removeChild(ifr);
             document.title = originalTitle;
-            
+          
             if (t == 0) { reachedTheEnd = true; return; } // no images added, this is the end
             infoScroll.innerHTML = cur + " (" + ((cur+step)/step) + ")";
         }
@@ -492,17 +492,19 @@ if (enableFavOnEnter) {
 
     // buttons
     $("#edit_form").prev().before(
-        '<img id="btn-like" class="custom-button" alt="like"     src="https://i.imgur.com/TOQLRok.png">' +
-        '<img id="btn-fav"  class="custom-button" alt="favorite" src="https://i.imgur.com/dTpBrIj.png">' +
-        '<img id="btn-prev" class="custom-button" alt="previous" src="https://i.imgur.com/Qh5DWPR.png">' +
-        '<img id="btn-next" class="custom-button" alt="next"     src="https://i.imgur.com/v6rmImf.png">'
+        '<img id="btn-like"  class="custom-button" alt="like"     src="https://i.imgur.com/TOQLRok.png">' +
+        '<img id="btn-fav"   class="custom-button" alt="favorite" src="https://i.imgur.com/dTpBrIj.png">' +
+        '<img id="btn-close" class="custom-button" alt="close"    src="https://i.imgur.com/k5r0EVo.png">' +
+        '<img id="btn-prev"  class="custom-button" alt="previous" src="https://i.imgur.com/Qh5DWPR.png">' +
+        '<img id="btn-next"  class="custom-button" alt="next"     src="https://i.imgur.com/v6rmImf.png">'
     );
 
     // button click events
-    $("#btn-like").click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')")        .click(); });
-    $("#btn-fav") .click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')")          .click(); });
-    $("#btn-prev").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
-    $("#btn-next").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')")    .click(); });
+    $("#btn-like") .click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')")        .click(); });
+    $("#btn-fav")  .click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')")          .click(); });
+    $("#btn-close").click(function() { window.close();                                                                 });
+    $("#btn-prev") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
+    $("#btn-next") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')")    .click(); });
 
     function addGlobalStyle(css) {
         var head, style;
@@ -514,4 +516,3 @@ if (enableFavOnEnter) {
         head.appendChild(style);
     }
 })();
-
