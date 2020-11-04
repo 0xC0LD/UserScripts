@@ -496,20 +496,30 @@ if (document.location.href.includes("view")) {
         
         // buttons
         $("#postbar").append(
-            '<button id="btn-like"  class="custom-button" alt="like">     <img style="width: 10px" src="https://i.imgur.com/TOQLRok.png"/> like</button>' +
-            '<button id="btn-fav"   class="custom-button" alt="favorite"> <img style="width: 10px" src="https://i.imgur.com/dTpBrIj.png"/> fav</button>' +
-            '<button id="btn-close" class="custom-button" alt="close">    <img style="width: 10px" src="https://i.imgur.com/k5r0EVo.png"/> close</button>' +
-            '<button id="btn-prev"  class="custom-button" alt="previous"> <img style="width: 10px" src="https://i.imgur.com/Qh5DWPR.png"/> prev</button>' +
-            '<button id="btn-next"  class="custom-button" alt="next">     <img style="width: 10px" src="https://i.imgur.com/v6rmImf.png"/> next</button>'
+            '<button id="btn-like"     class="custom-button" alt="like">👍like</button>' +
+            '<button id="btn-fav"      class="custom-button" alt="favorite">❤️fav</button>' +
+            '<button id="btn-close"    class="custom-button" alt="close">❌close</button>' +
+            '<button id="btn-favclose" class="custom-button" alt="favclose">❤️+❌favclose</button>' +
+            '<button id="btn-prev"     class="custom-button" alt="previous">⏮️prev</button>' +
+            '<button id="btn-next"     class="custom-button" alt="next">⏭️next</button>'
         );
         
     
         // button click events
-        $("#btn-like") .click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')")        .click(); });
-        $("#btn-fav")  .click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')")          .click(); });
-        $("#btn-close").click(function() { window.close();                                                                 });
-        $("#btn-prev") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
-        $("#btn-next") .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')")    .click(); });
+        $("#btn-like")    .click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')")        .click(); });
+        $("#btn-fav")     .click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')")          .click(); });
+        $("#btn-close")   .click(function() { window.close();                                                                 });
+        $("#btn-favclose").click(function() {
+            $("#stats + div > ul > li > a:contains('Add to favorites')").click();
+            setInterval(function(){
+                var selectElement = document.getElementById("notice");
+                if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
+                  window.close();
+                }
+            }, 500);
+        });
+        $("#btn-prev")    .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
+        $("#btn-next")    .click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')")    .click(); });
     
         function addGlobalStyle(css) {
             var head, style;
