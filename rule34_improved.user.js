@@ -28,29 +28,6 @@ var endlessScrollingInFav     = true;  // (true/false) Enables endless scrolling
 var favFilter                 = true;  // (true/false) Adds a tag searchbox in favorites
 // - Don't touch anything else unless you know what you're doing
 
-// credits:
-// 	* Hentiedup
-//		- original author
-//		- opt autoplayVideos
-//		- opt defaultVideoVolume
-//		- opt useViewportDependentHeight
-//		- opt viewportDependentHeight
-//		- opt stretchImgVid
-//		- opt trueVideoSize
-//	* 0xC0LD
-//		- code cleanup
-//		- comments
-//		- opt enableFavOnEnter
-//		- opt hideBlacklistedThumbnails
-//		- opt forceDarkTheme
-//		- opt betterDarkTheme
-//		- opt removeHentaiClickerGame
-//		- opt endlessScrollingInFav
-//	* usnkw
-//		- opt endlessScrolling
-//		- opt favFilter
-
-
 var customCSS = `
 * {
     --c-bg: #101010;
