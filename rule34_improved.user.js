@@ -27,12 +27,10 @@ var betterDarkTheme           = true;  // (true/false) Use a custom CSS dark the
 var removeHentaiClickerGame   = true;  // (true/false) Remove the hentai clicker game ad
 var endlessScrolling          = true;  // (true/false) When you get to the bottom of the current page it will automatically append the content from the next page on the current page
 var favFilter                 = true;  // (true/false) Adds a searchbox for tag(s) in favorites
+var showFavPosts              = true;  // (true/false) Shows you which posts are in your favorites while browsing
 // - Don't touch anything else unless you know what you're doing
 
-
-var es = GM_getValue("endlessScrolling", "null");
-if (es == "null") { GM_setValue("endlessScrolling", endlessScrolling); }
-else { endlessScrolling = es; }
+endlessScrolling = GM_getValue("endlessScrolling", endlessScrolling);
 
 var betterDarkThemeCss = `
 * {
@@ -165,9 +163,135 @@ var viewPDepenCSS = useViewportDependentSize ?
 	` + (stretchImgVid ? "" : "max-") + `height: ` + viewportDependentHeight + `vh !important;
 }`) : "";
 
+
+var favedPostCss = `
+opacity: 0.25;
+background-image:
+	linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black 75%, black), 
+	linear-gradient(45deg, black 25%, transparent 25%, transparent 75%, black 75%, black),
+	linear-gradient(lime, transparent);
+background-size: 4px 4px, 4px 4px, 100% 100%;    
+background-position: 0px 0px, 2px 2px, 0px 0px;
+`;
+
 function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
 
 var originalTitle = document.title;
+
+/// TODO: move all the options in options and save the values
+if (document.location.href.includes("index.php?page=account&s=options")) {
+	
+}
+
+// add fav controls container
+if (document.location.href.includes("index.php?page=favorites&s=view")) {
+	// container for all the controls in favorites
+	var cont = document.createElement("div");
+	cont.id = "favcontrols";
+	cont.style = "margin: 2px 5px 10px 5px;"
+	document.getElementById("header").parentNode.insertBefore(cont, document.getElementById("header").nextSibling);
+}
+
+if (showFavPosts) {
+	var favlist = GM_getValue("favlist", []);
+	
+	var shouldStop = false;
+	var txt_status2;
+	
+	// filtering
+	if (document.location.href.includes("index.php?page=post&s=list")) {
+		var elements = document.getElementsByClassName("thumb");
+		//console.log(elements);
+		for (let i = 0; i < elements.length; i++) {
+			var id = elements[i].id.replace('s', '');
+			if (favlist.includes(id)) { elements[i].style = favedPostCss; }
+		}
+	}
+	
+	// filtering in fav
+	if (document.location.href.includes("index.php?page=favorites&s=view")) {
+		var elements = document.getElementsByClassName("thumb");
+		for (let i = 0; i < elements.length; i++) {
+			var id = elements[i].childNodes[0].id.replace('p', '');
+			if (favlist.includes(id)) { elements[i].style = favedPostCss; }
+		}
+	}
+	
+	// the buttons for updating list
+	if (document.location.href.includes("index.php?page=favorites&s=view")) {
+		
+		// update fav list
+		var btn_updatefav = document.createElement("button");
+		btn_updatefav.style = "display: inline-block;";
+		btn_updatefav.title = favlist.length + " ID(s)";
+		btn_updatefav.innerHTML = "Update favorites list [" + favlist.length + "]";
+		async function getIds() {
+			var reg = /pid=([0-9]*)/gm;
+			var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
+			if (!base.includes("favorites")) { return console.log("not a favorites page"); };
+	
+			// vars
+			var step = 50;
+			var max;
+			var el = document.getElementsByName("lastpage")[0];
+			var maxMatch = reg.exec(el.attributes[1].nodeValue);
+			var max = maxMatch == null ? 0 : parseInt(maxMatch[1]);
+			var curMatch = reg.exec(document.location);
+			var cur = curMatch == null ? 0 : parseInt(curMatch[1]);
+			
+			var c = 0;
+			var added = 0;
+			
+			// start search
+			for (; cur <= max; cur += step) {
+				var url = base + "&pid=" + cur;
+				var ifr = document.createElement("iframe");
+				ifr.style = "display: none";
+				ifr.src = url;
+				ifr.onload = function() {
+					var elements = ifr.contentWindow.document.getElementsByClassName("thumb");
+					for (let i = 0; i < elements.length; i++) {
+						var id = elements[i].childNodes[0].id.replace('p', '');
+						if (!favlist.includes(id)) { favlist.push(id); added++; }
+						c++;
+						txt_status2.innerHTML = "images[" + c + "], favlist[" + favlist.length + "], added[" + added + "]";
+					}
+					ifr.parentNode.removeChild(ifr);
+				}
+				document.body.appendChild(ifr);
+				await sleep(slider.value);
+				if (shouldStop) { shouldStop = false; return; }
+				
+				GM_setValue("favlist", favlist);
+				btn_updatefav.title = favlist.length + " ID(s)";
+				btn_updatefav.innerHTML = "Update favorites list [" + favlist.length + "]";
+			}
+		}
+		btn_updatefav.onclick = function() { getIds(); };
+		
+		var cont = document.getElementById("favcontrols");
+		
+		var favlistCont = document.createElement("div");
+		favlistCont.style = "display: block; float: right; border: 1px solid green; width: 20%;";
+		
+		var btn_stopUpdate = document.createElement("button");
+		btn_stopUpdate.style = "display: inline-block;";
+		btn_stopUpdate.title = "Stop the update";
+		btn_stopUpdate.innerHTML = "Stop";
+		btn_stopUpdate.onclick = function() { shouldStop = true; };
+		
+		// url - status
+		txt_status2 = document.createElement("p");
+		txt_status2.id = "favlistStatus";
+		txt_status2.style = "display: block;";
+		
+		favlistCont.appendChild(btn_updatefav);
+		favlistCont.appendChild(btn_stopUpdate);
+		favlistCont.appendChild(txt_status2);
+		
+		cont.appendChild(favlistCont);
+	}
+}
 
 if (hideBlacklistedThumbnails) {
 	$(window).on('DOMContentLoaded load', async function() {
@@ -178,6 +302,7 @@ if (hideBlacklistedThumbnails) {
 	});
 }
 
+// endless scrolling
 if (document.location.href.includes("index.php?page=post&s=list") || document.location.href.includes("index.php?page=favorites&s=view")) {
 	
 	var cb = document.createElement('input');
@@ -347,10 +472,8 @@ if (favFilter) {
 
 	var base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
 	if (base.includes("favorites")) {
-
-		// container for all the controls
-		var cont = document.createElement("div");
-		cont.style = "margin: 2px 5px 10px 5px;"
+		
+		var cont = document.getElementById("favcontrols");
 		
 		// textbox for tags
 		input = document.createElement("input");
@@ -453,9 +576,6 @@ if (favFilter) {
 		txt_imageCount.id = "imageCount"
 		txt_imageCount.style = "margin: 0;";
 		cont.appendChild(txt_imageCount);
-		
-		// insert controls
-		document.getElementsByTagName("span")[0].parentNode.insertBefore(cont, document.getElementsByTagName("span")[0]);
 	};
 }
 
@@ -479,6 +599,24 @@ if (forceDarkTheme) {
 	if (betterDarkTheme) { GM_addStyle(betterDarkThemeCss) }
 }
 
+// fav + add to Values fav list
+function favPost() {
+	$("#stats + div > ul > li > a:contains('Add to favorites')").click();
+	var fun;
+	fun = function() {
+		var selectElement = document.getElementById("notice");
+		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
+			clearInterval(fun);
+			if (showFavPosts) {
+				var favlist = GM_getValue("favlist", []);
+				var id = document.location.href.split("id=")[1];
+				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
+			}
+		}
+	};
+	setInterval(fun, 500);
+}
+
 if (enableFavOnEnter) {
 	document.onkeydown = function(e) {
 		var event = document.all ? window.event : e;
@@ -491,12 +629,13 @@ if (enableFavOnEnter) {
 			case "comment":
 				break;
 			default:
-				if (event.keyCode == 13) $("#stats + div > ul > li > a:contains('Add to favorites')").click();
+				if (event.keyCode == 13) { favPost(); }
 				break;
 		}
 	}
 }
 
+// post view, add buttons
 if (document.location.href.includes("index.php?page=post&s=view")) {
 	
 	GM_addStyle(viewPDepenCSS);
@@ -525,17 +664,9 @@ if (document.location.href.includes("index.php?page=post&s=view")) {
 	
 	// button click events
 	$("#btn-like").click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')").click(); });
-	$("#btn-fav").click(function() { $("#stats + div > ul > li > a:contains('Add to favorites')").click(); });
+	$("#btn-fav").click(function() { favPost(); });
 	$("#btn-close").click(function() { window.close(); });
-	$("#btn-favclose").click(function() {
-		$("#stats + div > ul > li > a:contains('Add to favorites')").click();
-		setInterval(function(){
-			var selectElement = document.getElementById("notice");
-			if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
-				window.close();
-			}
-		}, 500);
-	});
+	$("#btn-favclose").click(function() { $('#btn-fav').click(); $('#btn-close').click(); });
 	$("#btn-prev").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
 	$("#btn-next").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')").click(); });
 }
