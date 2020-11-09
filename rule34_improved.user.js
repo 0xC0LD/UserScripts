@@ -192,6 +192,7 @@ if (document.location.href.includes("index.php?page=favorites&s=view")) {
 	document.getElementById("header").parentNode.insertBefore(cont, document.getElementById("header").nextSibling);
 }
 
+// TODO: when you remove a post from favs it should be removed from 'favlist'
 if (showFavPosts) {
 	var favlist = GM_getValue("favlist", []);
 	
