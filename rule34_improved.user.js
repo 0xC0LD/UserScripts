@@ -3,7 +3,7 @@
 // @namespace    UserScript
 // @version      3.1
 // @description  A lot of improvements for rule34.xxx
-// @author       Hentiedup, 0xC0LD, usnkw
+// @author       Hentiedup, 0xC0LD, usnkw, kekxd
 // @match        https://rule34.xxx/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @grant        GM_addStyle
