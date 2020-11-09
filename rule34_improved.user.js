@@ -600,7 +600,7 @@ if (forceDarkTheme) {
 }
 
 // fav + add to Values fav list
-function favPost() {
+function favPost(close = false) {
 	$("#stats + div > ul > li > a:contains('Add to favorites')").click();
 	var fun;
 	fun = function() {
@@ -612,6 +612,7 @@ function favPost() {
 				var id = document.location.href.split("id=")[1];
 				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
 			}
+			if (close) { window.close(); }
 		}
 	};
 	setInterval(fun, 500);
@@ -666,7 +667,7 @@ if (document.location.href.includes("index.php?page=post&s=view")) {
 	$("#btn-like").click(function() { $("#stats > ul > li:contains('(vote up)') > a:contains('up')").click(); });
 	$("#btn-fav").click(function() { favPost(); });
 	$("#btn-close").click(function() { window.close(); });
-	$("#btn-favclose").click(function() { $('#btn-fav').click(); $('#btn-close').click(); });
+	$("#btn-favclose").click(function() { favPost(true); });
 	$("#btn-prev").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Previous')").click(); });
 	$("#btn-next").click(function() { $("#stats + div + div + div + div > ul > li > a:contains('Next')").click(); });
 }
