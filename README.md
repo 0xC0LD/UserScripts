@@ -2,7 +2,7 @@
 UserScripts for (Violentmonkey, Greasemonkey, Tampermonkey, ...)
 
 ## Install:
-| Site | Download Link | Description |
+| Site | Click to Install | Description |
 | :---: | :---: | :---: |
 | * | [Allow Middle Click](https://github.com/0xC0LD/UserScripts/raw/master/allow_middle_click.user.js) | Allow middle click on websites that prevent it (e.g. Pinterest and Instagram) |
 | ![Reddit](https://www.redditstatic.com/desktop2x/img/favicon/favicon-16x16.png) | [FORCE OLD REDDIT](https://github.com/0xC0LD/UserScripts/raw/master/oldReddit.user.js) | redirect to old reddit |
