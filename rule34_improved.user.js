@@ -33,6 +33,8 @@ var removeHentaiClickerGame_   = "removeHentaiClickerGame";   var removeHentaiCl
 var endlessScrolling_          = "endlessScrolling";          var endlessScrolling          = GM_getValue(endlessScrolling_         , true  ); recheckS(endlessScrolling_          , endlessScrolling         );
 var favFilter_                 = "favFilter";                 var favFilter                 = GM_getValue(favFilter_                , true  ); recheckS(favFilter_                 , favFilter                );
 var showFavPosts_              = "showFavPosts";              var showFavPosts              = GM_getValue(showFavPosts_             , true  ); recheckS(showFavPosts_              , showFavPosts             );
+var showFavPosts2_             = "showFavPosts2";             var showFavPosts2             = GM_getValue(showFavPosts2_            , true  ); recheckS(showFavPosts2_             , showFavPosts2            );
+
 
 var betterDarkThemeCss = `
 * { --c-bg: #101010; --c-bg-alt: #101010; --c-bg-highlight: #202020; }
@@ -421,11 +423,13 @@ if (isPage_opt) {
 	makeCB_form(enableFavOnEnter_          , enableFavOnEnter          , "Enable Fav On Enter",         "Use the ENTER key on your keyboard to add a post to your favorites" );
 	makeCB_form(hideBlacklistedThumbnails_ , hideBlacklistedThumbnails , "Hide Blacklisted Thumbnails", "Hide blacklisted thumbnails on the front page." );
 	makeCB_form(forceDarkTheme_            , forceDarkTheme            , "Force Dark Theme",            "Force rule34's dark theme on every page, even if light theme is set in the options" );
-	makeCB_form(betterDarkTheme_           , betterDarkTheme           , "Better Dark Theme",           "Use a custom CSS dark theme with the rule34's dark theme (must enable 'Force Dark Theme')" );     
+	makeCB_form(betterDarkTheme_           , betterDarkTheme           , "Better Dark Theme",           "(must enable 'Force Dark Theme') Use a custom CSS dark theme with the rule34's dark theme" );     
 	makeCB_form(removeHentaiClickerGame_   , removeHentaiClickerGame   , "Remove Hentai Clicker Game",  "Remove the hentai clicker game AD" );
 	makeCB_form(endlessScrolling_          , endlessScrolling          , "Endless Scrolling",           "When you get to the bottom of the current page it will automatically append the content from the next page on the current page" );
 	makeCB_form(favFilter_                 , favFilter                 , "Favorites Filter",            "Adds a searchbox for tag(s) in favorites" );
 	makeCB_form(showFavPosts_              , showFavPosts              , "Show Fav Posts",              "Shows you which posts are in your favorites while browsing" );
+	makeCB_form(showFavPosts2_             , showFavPosts2             , "Hide Fav Posts",              "(must enable 'Show Fav Posts') Hides favorites while browsing" );
+
 }
 
 if (isPage_fav) {
@@ -604,10 +608,11 @@ if (showFavPosts) {
 	
 	// filtering
 	if (isPage_posts) {
-		let elements = document.getElementsByClassName("thumb");
+		let elements = document.querySelectorAll(".thumb");
 		for (let i = 0; i < elements.length; i++) {
 			let id = elements[i].id.replace('s', '');
 			if (favlist.includes(id)) {
+				if (showFavPosts2) {  elements[i].remove(); continue; }
 				let heart = document.createElement("div");
 				heart.style = heartStyle;
 				heart.innerHTML = "❤️";
@@ -621,10 +626,11 @@ if (showFavPosts) {
 	if (isPage_fav) {
 		
 		// show fav posts
-		let elements = document.getElementsByClassName("thumb");
+		let elements = document.querySelectorAll(".thumb");
 		for (let i = 0; i < elements.length; i++) {
 			let id = elements[i].childNodes[0].id.replace('p', '');
 			if (favlist.includes(id)) {
+				if (showFavPosts2) { elements[i].remove(); continue; }
 				let heart = document.createElement("div");
 				heart.style = heartStyle;
 				heart.innerHTML = "❤️";
