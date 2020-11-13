@@ -176,7 +176,7 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 	top: 4px;
 	left: 6px;
 	position: absolute;
-	opacity: 1;
+	opacity: 0;
 	cursor: pointer;
 	height: 0;
 	width: 0;
