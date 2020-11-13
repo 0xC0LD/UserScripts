@@ -311,12 +311,12 @@ if (forceDarkTheme) {
 	
 	// append dark theme
 	let head  = document.getElementsByTagName('head')[0];
-    let link  = document.createElement('link');
-    link.rel  = 'stylesheet';
-    link.type = 'text/css';
-    link.href = 'https://rule34.xxx/css/desktop_bip.css?7';
-    link.media = 'screen';
-    head.appendChild(link);
+	let link  = document.createElement('link');
+	link.rel  = 'stylesheet';
+	link.type = 'text/css';
+	link.href = 'https://rule34.xxx/css/desktop_bip.css?7';
+	link.media = 'screen';
+	head.appendChild(link);
 	
 	// append even better dark theme css
 	if (betterDarkTheme) { GM_addStyle(betterDarkThemeCss) }
