@@ -137,6 +137,68 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 	background-color: gray;
 	border-radius: 5px;
 }
+
+.checkboxContainer {
+	display: inline-block;
+	position: relative;
+	padding-left: 15px;
+	margin-bottom: 5px;
+	margin-right: 5px;
+	cursor: pointer;
+	font-size: 22px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	height: 35px;
+	width: 20px;
+}
+
+#endlessScrolling_cb {
+	width: 15px;
+	height: 15px;
+	float: right;
+	right: 1px;
+	top: 1px;
+	padding: 0;
+	margin: 0px 15px 0px px;
+}
+
+#endlessScrolling_cb .checkmark {
+	height: 13px;
+	width: 13px;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+/* Hide the browser's default checkbox */
+.checkboxContainer input {
+	top: 4px;
+	left: 6px;
+	position: absolute;
+	opacity: 1;
+	cursor: pointer;
+	height: 0;
+	width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+	position: absolute;
+	top: 3px;
+	left: 5px;
+	height: 25px;
+	width: 25px;
+	background-color: #202020;
+	border: 2px green solid;
+	border-radius: 3px;
+	transition: all .2s ease;
+}
+
+.checkboxContainer:hover input ~ .checkmark { background-color: #404040; }
+.checkboxContainer input:checked ~ .checkmark { background-color: lime; }
+.checkboxContainer input:checked ~ .checkmark:after { display: block; }
+
 `;
 
 var postCss = `
@@ -199,7 +261,7 @@ var heartStyle = `
 /// TODO:
 //    - recode endless scrolling/favfilter use 'thumb' class instead of 'img' tag
 //    - remove sleep() ... instead wait for the server to respond then continue
-//    - custom checkbox css
+//    - inject custom checkbox css / radio button css
 //    - remove jQuery
 //    - add fav button while browsing in thumb div
 
@@ -221,6 +283,7 @@ function favPost(id, close = false) {
 		}
 	}, 500);
 }
+
 function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
 var originalTitle = document.title;
 var isPage_post = document.location.href.includes("index.php?page=post&s=view");
@@ -229,7 +292,6 @@ var isPage_fav = document.location.href.includes("index.php?page=favorites&s=vie
 var isPage_opt = document.location.href.includes("index.php?page=account&s=options");
 
 $(window).on('load', async function() {
-	
 	if (hideBlacklistedThumbnails) {
 		let elements = document.getElementsByClassName("thumb blacklisted-image");
 		while (elements[0]) { elements[0].remove(); }
@@ -267,103 +329,103 @@ if (isPage_opt) {
 	
 	let vtbody = document.body.getElementsByTagName("tbody")[0];
 	
-	function createCheckBox(setv, setv_, name, desc) {
+	function makeCB(setv_, setv) {
+		let label = document.createElement("label");
+		label.className = "checkboxContainer";
+		let input = document.createElement("input");
+		input.type = "checkbox";
+		input.checked = GM_getValue(setv_, setv);
+		input.addEventListener("change", function() { GM_setValue(setv_, this.checked); setv = this.checked; });
+		let span = document.createElement("span");
+		span.className = "checkmark";
+		label.appendChild(input);
+		label.appendChild(span);
+		return label;
+	}
+	
+	function makeCB_form(setv_, setv, name, desc) {
 		let vtr = document.createElement("tr");
 		let vth = document.createElement("th");
 		vlabel = document.createElement("label");
 		vlabel.className = "block";
 		vlabel.innerHTML = name;
 		vth.appendChild(vlabel);
-		
 		let vp = document.createElement("p");
 		vp.innerHTML = desc;
 		vth.appendChild(vp);
 		vtr.appendChild(vth);
-		
 		let vtd = document.createElement("td");
-		let vinput = document.createElement("input");
-		vinput.type = "checkbox";
-		vinput.checked = GM_getValue(setv_, setv);
-		vinput.addEventListener("change", function() { GM_setValue(setv_, this.checked); });
-		vtd.appendChild(vinput);
+		vtd.appendChild(makeCB(setv_, setv));
 		vtr.appendChild(vtd);
 		vtbody.appendChild(vtr);
 	}
   	
-	createCheckBox(autoplayVideos            , autoplayVideos_            , "AutoPlay",                    "Automatically play the video.");
+	makeCB_form(autoplayVideos_            , autoplayVideos            , "AutoPlay",                    "Automatically play the video.");
 	{
-		let vtr = document.createElement("tr");
-		let vth = document.createElement("th");
-		let vlabel = document.createElement("label");
-		vlabel.className = "block";
-		vlabel.innerHTML = "Default Video Volume";
-		vth.appendChild(vlabel);
-		vtr.appendChild(vth);
+		let row = document.createElement("tr");
+		let header = document.createElement("th");
+		let title = document.createElement("label");
+		title.className = "block";
+		title.innerHTML = "Default Video Volume";
+		header.appendChild(title);
+		row.appendChild(header);
 		
-		let vtd = document.createElement("td");
+		let data = document.createElement("td");
 		let slider = document.createElement("input");
 		slider.type = "range";
 		slider.min = "0";
 		slider.max = "100";
 		slider.value = GM_getValue(defaultVideoVolume_, defaultVideoVolume) * 100;
 		slider.className = "slider";
-		
-		let vp1 = document.createElement("p");
-		vp1.style = "display: inline-block;";
-		vp1.innerHTML = "Volume: " + slider.value + "%";
-		slider.oninput = function() { vp1.innerHTML = "Volume: " + slider.value + "%"; GM_setValue(defaultVideoVolume_, slider.value / 100);  }
-		vtd.appendChild(slider);
-		vtd.appendChild(vp1);
-		vtr.appendChild(vtd);
-		vtbody.appendChild(vtr);
+		let slider_info = document.createElement("p");
+		slider_info.style = "display: inline-block;";
+		slider_info.innerHTML = "Volume: " + slider.value + "%";
+		slider.oninput = function() { slider_info.innerHTML = "Volume: " + slider.value + "%"; GM_setValue(defaultVideoVolume_, slider.value / 100);  }
+		data.appendChild(slider);
+		data.appendChild(slider_info);
+		row.appendChild(data);
+		vtbody.appendChild(row);
 	}
 	{
-		let vtr = document.createElement("tr");
-		let vth = document.createElement("th");
-		let vlabel = document.createElement("label");
-		vlabel.className = "block";
-		vlabel.innerHTML = "Image/Video Height";
-		vth.appendChild(vlabel);
+		let row = document.createElement("tr");
+		let header = document.createElement("th");
+		let title = document.createElement("label");
+		title.className = "block";
+		title.innerHTML = "Image/Video Height";
+		let p = document.createElement("p");
+		p.innerHTML = "Viewport Dependent Height";
+		header.appendChild(title);
+		header.appendChild(p);
+		row.appendChild(header);
 		
-		let vp = document.createElement("p");
-		vp.innerHTML = "Viewport Dependent Height";
-		vth.appendChild(vp);
-		vtr.appendChild(vth);
-		
-		let vtd = document.createElement("td");
-		let vinput = document.createElement("input");
-		vinput.type = "checkbox";
-		vinput.checked = GM_getValue(useViewportDependentSize_, useViewportDependentSize);
-		vinput.addEventListener("change", function() { GM_setValue(useViewportDependentSize_, this.checked); });
-    	
+		let data = document.createElement("td");
 		let slider = document.createElement("input");
 		slider.type = "range";
 		slider.min = 0;
 		slider.max = 100;
 		slider.value = GM_getValue(viewportDependentHeight_, viewportDependentHeight);
 		slider.className = "slider";
-			
-		let vp2 = document.createElement("p");
-		vp2.style = "display: inline-block;";
-		vp2.innerHTML = slider.value + "%";
-		slider.oninput = function() { vp2.innerHTML = slider.value + "%"; GM_setValue(viewportDependentHeight_, slider.value);  }
+		let slider_info = document.createElement("p");
+		slider_info.style = "display: inline-block;";
+		slider_info.innerHTML = "Volume: " + slider.value + "%";
+		slider.oninput = function() { slider_info.innerHTML = slider.value + "%"; GM_setValue(viewportDependentHeight_, slider.value);  }
 		
-		vtd.appendChild(vinput);
-		vtd.appendChild(slider);
-		vtd.appendChild(vp2);
-		vtr.appendChild(vtd);
-		vtbody.appendChild(vtr);
+		data.appendChild(makeCB(useViewportDependentSize_, useViewportDependentSize));
+		data.appendChild(slider);
+		data.appendChild(slider_info);
+		row.appendChild(data);
+		vtbody.appendChild(row);
 	}
-	createCheckBox(stretchImgVid             , stretchImgVid_             , "Stretch Image/Video",         "This overrides 'True Video Size'" );
-	createCheckBox(trueVideoSize             , trueVideoSize_             , "True Video Size",             "Resizes videos to their true size" );
-	createCheckBox(enableFavOnEnter          , enableFavOnEnter_          , "Enable Fav On Enter",         "Use the ENTER key on your keyboard to add a post to your favorites" );
-	createCheckBox(hideBlacklistedThumbnails , hideBlacklistedThumbnails_ , "Hide Blacklisted Thumbnails", "Hide blacklisted thumbnails on the front page." );
-	createCheckBox(forceDarkTheme            , forceDarkTheme_            , "Force Dark Theme",            "Force rule34's dark theme on every page, even if light theme is set in the options" );
-	createCheckBox(betterDarkTheme           , betterDarkTheme_           , "Better Dark Theme",           "Use a custom CSS dark theme with the rule34's dark theme (must enable 'Force Dark Theme')" );     
-	createCheckBox(removeHentaiClickerGame   , removeHentaiClickerGame_   , "Remove Hentai Clicker Game",  "Remove the hentai clicker game AD" );
-	createCheckBox(endlessScrolling          , endlessScrolling_          , "Endless Scrolling",           "When you get to the bottom of the current page it will automatically append the content from the next page on the current page" );
-	createCheckBox(favFilter                 , favFilter_                 , "Favorites Filter",            "Adds a searchbox for tag(s) in favorites" );
-	createCheckBox(showFavPosts              , showFavPosts_              , "Show Fav Posts",              "Shows you which posts are in your favorites while browsing" );
+	makeCB_form(stretchImgVid_             , stretchImgVid             , "Stretch Image/Video",         "This overrides 'True Video Size'" );
+	makeCB_form(trueVideoSize_             , trueVideoSize             , "True Video Size",             "Resizes videos to their true size" );
+	makeCB_form(enableFavOnEnter_          , enableFavOnEnter          , "Enable Fav On Enter",         "Use the ENTER key on your keyboard to add a post to your favorites" );
+	makeCB_form(hideBlacklistedThumbnails_ , hideBlacklistedThumbnails , "Hide Blacklisted Thumbnails", "Hide blacklisted thumbnails on the front page." );
+	makeCB_form(forceDarkTheme_            , forceDarkTheme            , "Force Dark Theme",            "Force rule34's dark theme on every page, even if light theme is set in the options" );
+	makeCB_form(betterDarkTheme_           , betterDarkTheme           , "Better Dark Theme",           "Use a custom CSS dark theme with the rule34's dark theme (must enable 'Force Dark Theme')" );     
+	makeCB_form(removeHentaiClickerGame_   , removeHentaiClickerGame   , "Remove Hentai Clicker Game",  "Remove the hentai clicker game AD" );
+	makeCB_form(endlessScrolling_          , endlessScrolling          , "Endless Scrolling",           "When you get to the bottom of the current page it will automatically append the content from the next page on the current page" );
+	makeCB_form(favFilter_                 , favFilter                 , "Favorites Filter",            "Adds a searchbox for tag(s) in favorites" );
+	makeCB_form(showFavPosts_              , showFavPosts              , "Show Fav Posts",              "Shows you which posts are in your favorites while browsing" );
 }
 
 if (isPage_fav) {
@@ -659,13 +721,18 @@ if (showFavPosts) {
 
 if (isPage_posts || isPage_fav) {
 	
-	let cb = document.createElement('input');
-	cb.type = "checkbox";
-	cb.id = "endlessScrolling_cb";
-	cb.style = "display: block; cursor: pointer; float: right;";
-	cb.checked = endlessScrolling;
-	cb.title = "Enable endless scrolling"
-	cb.addEventListener('change', (event) => { GM_setValue("endlessScrolling", event.target.checked); });
+	let label = document.createElement("label");
+	label.className = "checkboxContainer";
+	label.title = "Enable endless scrolling";
+	label.id = "endlessScrolling_cb";
+	let input = document.createElement("input");
+	input.type = "checkbox";
+	input.checked = endlessScrolling;
+	input.addEventListener("change", function() { GM_setValue(endlessScrolling_, this.checked); endlessScrolling = this.checked; });
+	let span = document.createElement("span");
+	span.className = "checkmark";
+	label.appendChild(input);
+	label.appendChild(span);
 	
 	let p = document.createElement("p");
 	p.id = "endlessScrolling_p";
@@ -675,7 +742,7 @@ if (isPage_posts || isPage_fav) {
 	let div = document.createElement("div");
 	div.id = "endlessScrolling_cont";
 	div.style = "position: fixed; top: 5px; right: 5px;";
-	div.append(cb);
+	div.append(label);
 	div.append(p);
 	
 	document.body.appendChild(div);
@@ -720,7 +787,7 @@ if (isPage_posts || isPage_fav) {
 		let loadNext = true;
 		$(window).on('DOMContentLoaded load resize scroll', async function() {
 			if (reachedTheEnd) { return; }
-			if (!cb.checked) { return; }
+			if (!endlessScrolling) { return; }
 		  	
 			if ($('#paginator').isInViewport() && loadNext) {
 				loadNext = false;
