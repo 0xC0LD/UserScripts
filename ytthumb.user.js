@@ -3,7 +3,7 @@
 // @namespace    UserScript
 // @version      1.0
 // @description  Adds a button to the current thumbnail of a video
-// @author       C0LD
+// @author       0xC0LD
 // @include      http*://*.youtube.com/*
 // @include      http*://youtube.com/*
 // @include      http*://*.youtu.be/*
