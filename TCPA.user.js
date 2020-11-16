@@ -16,23 +16,16 @@ function time() {
 	return ((h<10?'0':'') + h + ':' + (m<10?'0':'') + m + ":" + (s<10?'0':'') + s);
 }
 
-function getBalance() {
-	let els = document.getElementsByClassName("tw-animated-number");
-  let balance = -1;
-  if (els.length >= 2) { balance = els[1].innerHTML; }
-	return balance;
-}
-
 function clickChest() {
 	let els = document.getElementsByClassName("claimable-bonus__icon");
 	for (let i = 0; i < els.length; i++) {
 		els[i].click();
-		console.log(`[TCPA] | ${time()} | ${getBalance()} | Claimed a bonus chest.`);
+		console.log(`${time()} # Claimed a bonus chest.`);
 	}
 }
 
 function run() {
-  console.log(`[TCPA] | ${time()} | ${getBalance()} | Running...`);
+  console.log(`${time()} # Running...`);
   setInterval(clickChest, 5000);
 }
 
