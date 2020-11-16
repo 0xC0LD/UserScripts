@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         youtube thumb
+// @name         Youtube Thumbnail
 // @namespace    UserScript
 // @version      1.0
-// @description  adds a href/link/button to the current thumbnail of a video
+// @description  Adds a button to the current thumbnail of a video
 // @author       C0LD
 // @include      http*://*.youtube.com/*
 // @include      http*://youtube.com/*
@@ -12,122 +12,65 @@
 // @icon         https://www.youtube.com/favicon.ico
 // ==/UserScript==
 
-function polymerInject(){
-	/* Create button */
-	var buttonDiv = document.createElement("a");
-	var url = window.document.location.toString();
-	var id = url.replace("https://www.youtube.com/watch?v=", "");
-	var thumbUrl = 'https://i.ytimg.com/vi/' + id + '/maxresdefault.jpg';
-	buttonDiv.href = thumbUrl;
-	buttonDiv.style.width = "100%";
-	buttonDiv.id = "parentButton";
-	var addButton = document.createElement("button");
-	addButton.appendChild(document.createTextNode("Thumbnail"));
+var video_id = window.location.search.split('v=')[1];
+var ampersandPosition = video_id.indexOf('&');
+if(ampersandPosition != -1) { video_id = video_id.substring(0, ampersandPosition); }
 
-	if(typeof(document.getElementById("iframeDownloadButton")) != 'undefined' && document.getElementById("iframeDownloadButton") !== null){
-		document.getElementById("iframeDownloadButton").remove();
-	}
+var imgD = `https://img.youtube.com/vi/${video_id}/maxresdefault.jpg`; // Maximum Resolution
+var imgH = `https://img.youtube.com/vi/${video_id}/hqdefault.jpg`;     // High Quality
+var imgM = `https://img.youtube.com/vi/${video_id}/mqdefault.jpg`;     // Medium Quality
+var imgL = `https://img.youtube.com/vi/${video_id}/sddefault.jpg`;     // Low Quality
 
-	addButton.style.width = "100px";
-	addButton.style.backgroundColor = "#181717";
-	addButton.style.color = "white";
-	addButton.style.textAlign = "center";
-	addButton.style.padding = "10px 0";
-	addButton.style.marginTop = "5px";
-	addButton.style.fontSize = "14px";
-	addButton.style.border = "0";
-	addButton.style.cursor = "pointer";
-	addButton.style.borderRadius = "2px";
-	addButton.style.fontFamily = "Roboto, Arial, sans-serif";
-	buttonDiv.appendChild(addButton);
+var urls = [ imgD, imgH, imgM, imgL ];
 
-	/* Find and add to target */
-	var targetElement = document.querySelectorAll("[id='container']");
-	for(var i = 0; i < targetElement.length; i++){
-		if(targetElement[i].className.indexOf("ytd-video-secondary-info-renderer") > -1){
-			targetElement[i].appendChild(buttonDiv);
-		}
-	}
-
-	/* Fix hidden description bug */
-	var descriptionBox = document.querySelectorAll("ytd-video-secondary-info-renderer");
-	if(descriptionBox[0].className.indexOf("loading") > -1){
-		descriptionBox[0].classList.remove("loading");
-	}
+var index = 0;
+function get() {
+  httpGetAsync(urls[index]);
+  index++;
 }
 
-function standardInject() {
-	var pagecontainer=document.getElementById('page-container');
-	if (!pagecontainer) return;
-	if (/^https?:\/\/www\.youtube.com\/watch\?/.test(window.location.href)) run();
-	var isAjax=/class[\w\s"'-=]+spf\-link/.test(pagecontainer.innerHTML);
-	var logocontainer=document.getElementById('logo-container');
-	if (logocontainer && !isAjax) { // fix for blocked videos
-		isAjax=(' '+logocontainer.className+' ').indexOf(' spf-link ')>=0;
-	}
-	var content=document.getElementById('content');
-	if (isAjax && content) { // Ajax UI
-		var mo=window.MutationObserver||window.WebKitMutationObserver;
-		if(typeof mo!=='undefined') {
-			var observer=new mo(function(mutations) {
-				mutations.forEach(function(mutation) {
-					if(mutation.addedNodes!==null) {
-						for (var i=0; i<mutation.addedNodes.length; i++) {
-							if (mutation.addedNodes[i].id=='watch7-container' ||
-								mutation.addedNodes[i].id=='watch7-main-container') { // old value: movie_player
-								run();
-								break;
-							}
-						}
-					}
-				});
-			});
-			observer.observe(content, {childList: true, subtree: true}); // old value: pagecontainer
-		} else { // MutationObserver fallback for old browsers
-			pagecontainer.addEventListener('DOMNodeInserted', onNodeInserted, false);
-		}
-	}
-}
-
-function onNodeInserted(e) {
-    if (e && e.target && (e.target.id=='watch7-container' ||
-                          e.target.id=='watch7-main-container')) { // old value: movie_player
-        run();
+function httpGetAsync(theUrl) {
+  console.log("... : " + theUrl);
+  var xmlHttp = new XMLHttpRequest();
+  xmlHttp.onreadystatechange = function() { 
+    if (xmlHttp.readyState != 4) { return; }
+    switch(xmlHttp.status) {
+      case 200: console.log("202 : " + theUrl); createButton(theUrl); break;
+      case 404: console.log("404 : " + theUrl); get(); break;
     }
+  }
+  xmlHttp.open("GET", theUrl, true);
+  
+  try { xmlHttp.send(null); }
+  catch (err) {
+    console.log(err);
+    get();
+  }
 }
 
-function run() {
-	if(!document.getElementById("parentButton") && window.location.href.substring(0, 25).indexOf("youtube.com") > -1 && window.location.href.indexOf("watch?") > -1){
-		
-		var parentButton = document.createElement("div");
-		
-		parentButton.className = "yt-uix-button yt-uix-button-default";
-		parentButton.id = "parentButton";
-		
-		parentButton.style.height = "23px";
-		parentButton.style.marginLeft = "28px";
-		parentButton.style.paddingBottom = "1px";
-		
-		parentButton.onclick = function () { this.remove(); };
-		
-		document.getElementById("watch7-user-header").appendChild(parentButton);
-		
-		var childButton = document.createElement("span");
-		childButton.appendChild(document.createTextNode("Thumbnail"));
-		childButton.className = "yt-uix-button-content";
-		childButton.style.lineHeight = "25px";
-		childButton.style.fontSize = "12px";
-		parentButton.appendChild(childButton);
-	}
+
+var style = `
+  float: right !important;
+  color: rgba(255, 255, 255, 0.54) !important;
+  background: transparent !important;
+  font-size: 11px;
+  border: solid rgba(255, 255, 255, 0.54) 1px !important;
+  padding: 3px !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+`
+
+function createButton(url) {
+  let btn = document.createElement("a");
+  btn.style = style;
+  btn.innerHTML = "Thumbnail";
+  btn.href = url;
+  btn.title = url;
+  
+  let added = false;
+  let els = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer");
+  for (let i = 0; i < els.length; i++) { els[i].appendChild(btn); added = true; console.log("BTN : " + url); }
+  if (!added) { setTimeout(function() { createButton(url) }, 100); }
 }
 
-if(document.getElementById("polymer-app") || document.getElementById("masthead") || window.Polymer){
-	setInterval(function(){
-		if(window.location.href.indexOf("watch?v=") < 0) { return false; }
-		if(document.getElementById("count") && document.getElementById("parentButton") === null) { polymerInject(); }
-	}, 100);
-}
-else { standardInject(); }
-
-    
-
+get();
