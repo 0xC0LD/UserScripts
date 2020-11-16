@@ -12,19 +12,29 @@
 // @icon         https://www.youtube.com/favicon.ico
 // ==/UserScript==
 
-var video_id = window.location.search.split('v=')[1];
-var ampersandPosition = video_id.indexOf('&');
-if (ampersandPosition != -1) { video_id = video_id.substring(0, ampersandPosition); }
-
-var imgD = `https://img.youtube.com/vi/${video_id}/maxresdefault.jpg`; // Maximum Resolution
-var imgH = `https://img.youtube.com/vi/${video_id}/hqdefault.jpg`;     // High Quality
-var imgM = `https://img.youtube.com/vi/${video_id}/mqdefault.jpg`;     // Medium Quality
-var imgL = `https://img.youtube.com/vi/${video_id}/sddefault.jpg`;     // Low Quality
-
-var urls = [ imgD, imgH, imgM, imgL ];
-
+var page = "";
 var index = 0;
 function get() {
+	// remove priv buttons
+	let btns = document.getElementById("btn_thumbnail_url");
+	if (btns != null) { btns.remove(); }
+	
+	// get id
+	let split = window.location.search.split('v=');
+	if (split.length != 2) { return; }
+	let video_id = split[1];
+	let ampersandPosition = video_id.indexOf('&');
+	if (ampersandPosition != -1) { video_id = video_id.substring(0, ampersandPosition); }
+	
+	// make urls
+	let imgD = `https://img.youtube.com/vi/${video_id}/maxresdefault.jpg`; // Maximum Resolution
+	let imgH = `https://img.youtube.com/vi/${video_id}/hqdefault.jpg`;     // High Quality
+	let imgM = `https://img.youtube.com/vi/${video_id}/mqdefault.jpg`;     // Medium Quality
+	let imgL = `https://img.youtube.com/vi/${video_id}/sddefault.jpg`;     // Low Quality
+	let urls = [ imgD, imgH, imgM, imgL ];
+	
+	// make requests
+	if (index > urls.length - 1) { index = 0; }
 	httpGetAsync(urls[index]);
 	index++;
 }
@@ -58,14 +68,15 @@ var style = `
 	padding: 3px !important;
 	text-decoration: none !important;
 	text-transform: uppercase !important;
-`
+`;
 
 function createButton(url) {
 	let btn = document.createElement("a");
 	btn.style = style;
+	btn.id = "btn_thumbnail_url";
 	btn.innerHTML = "Thumbnail";
 	btn.href = url;
-	btn.title = url.split(video_id + "/")[1];
+	btn.title = url.split('/').pop() + " (" + url + ")";
 	
 	let added = false;
 	let els = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer");
@@ -73,4 +84,14 @@ function createButton(url) {
 	if (!added) { setTimeout(function() { createButton(url) }, 100); }
 }
 
-get();
+
+function checker() {
+	if (page != window.location.href) {
+		page = window.location.href;
+		index = 0;
+		get();
+	}
+}
+
+setInterval(checker, 500);
+
