@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Twitch Channel Points Autoclaimer [TCPA]
 // @version      0.1
-// @description  Automatically clicks the Chest icon to get points.
+// @description  Automatically Clicks the Chest Icon to Get Points.
 // @author       0xC0LD
 // @include      *://*.twitch.tv/*
 // @run-at       document-start
