@@ -8,4 +8,4 @@ UserScripts for (Violentmonkey, Greasemonkey, Tampermonkey, ...)
 | ![Reddit](https://www.redditstatic.com/desktop2x/img/favicon/favicon-16x16.png) | [FORCE OLD REDDIT](https://github.com/0xC0LD/UserScripts/raw/master/oldReddit.user.js) | redirect to old reddit |
 | ![Rule34](https://rule34.xxx/favicon.ico) | [Rule34.xxx Improved](https://github.com/0xC0LD/UserScripts/raw/master/rule34_improved.user.js) | A lot of improvements for rule34.xxx |
 | ![YouTube](https://www.youtube.com/favicon.ico) | [youtube thumb](https://github.com/0xC0LD/UserScripts/raw/master/ytthumb.user.js) | (unfinished) adds a href/link/button to the current thumbnail of a video |
-| ![Twitch](https://www.twitch.tv/favicon.ico) | [TCPA](https://github.com/0xC0LD/UserScripts/raw/master/TCPA.user.js) | Automatically clicks the Chest icon to get points. |
+| ![Twitch](https://static.twitchcdn.net/assets/favicon-32-d6025c14e900565d6177.png) | [TCPA](https://github.com/0xC0LD/UserScripts/raw/master/TCPA.user.js) | Automatically clicks the Chest icon to get points. |
