@@ -642,7 +642,8 @@ if (showFavPosts) {
 		
 		for (let i = 0; i < elements.length; i++) {
 			let id = elements[i].childNodes[0].id.replace('p', '');
-			let rm = elements[i].childNodes[2].remove();
+			let rm = elements[i].childNodes[2];
+			if (rm != undefined) { rm.remove(); }
 			
 			let btn = document.createElement("button");
 			btn.className = "button-remove";
