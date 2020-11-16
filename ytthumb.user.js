@@ -65,7 +65,7 @@ function createButton(url) {
 	btn.style = style;
 	btn.innerHTML = "Thumbnail";
 	btn.href = url;
-	btn.title = url;
+	btn.title = url.split(video_id + "/")[1];
 	
 	let added = false;
 	let els = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer");
