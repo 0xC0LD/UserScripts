@@ -283,7 +283,7 @@ function favPost(id, close = false) {
 			}
 			if (close) { window.close(); }
 		}
-	}, 500);
+	}, 100);
 }
 
 function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
