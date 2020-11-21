@@ -39,7 +39,7 @@ var showFavPosts2_             = "showFavPosts2";             var showFavPosts2 
 var betterDarkThemeCss = `
 * { --c-bg: #101010; --c-bg-alt: #101010; --c-bg-highlight: #202020; }
 
-body { background-image: none; color: white; background-color: #101010 }
+body { background-image: none !important; color: white !important; background-color: #101010 !important }
 
 table.highlightable td { border-color: #023C00; }
 
