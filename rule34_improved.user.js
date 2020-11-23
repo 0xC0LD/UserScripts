@@ -5,7 +5,6 @@
 // @description  A lot of improvements for rule34.xxx
 // @author       Hentiedup, 0xC0LD, usnkw, kekxd
 // @match        https://rule34.xxx/*
-// @require      https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -263,7 +262,6 @@ var heartStyle = `
 //    - recode endless scrolling/favfilter use 'thumb' class instead of 'img' tag
 //    - remove sleep() ... instead wait for the server to respond then continue
 //    - inject custom checkbox css / radio button css
-//    - remove jQuery
 //    - add fav button while browsing in thumb div
 
 function favPost(id, close = false) {
@@ -292,12 +290,11 @@ var isPage_posts = document.location.href.includes("index.php?page=post&s=list")
 var isPage_fav = document.location.href.includes("index.php?page=favorites&s=view");
 var isPage_opt = document.location.href.includes("index.php?page=account&s=options");
 
-$(window).on('load', async function() {
-	if (hideBlacklistedThumbnails) {
-		let elements = document.getElementsByClassName("thumb blacklisted-image");
-		while (elements[0]) { elements[0].remove(); }
-	}
-});
+
+if (hideBlacklistedThumbnails) {
+	let elements = document.getElementsByClassName("thumb blacklisted-image");
+	while (elements[0]) { elements[0].remove(); }
+}
 
 if (removeBloat) {
 	let items = document.getElementsByTagName("a");
@@ -757,13 +754,10 @@ if (isPage_posts || isPage_fav) {
 	
 	document.body.appendChild(div);
 	
-	$.fn.isInViewport = function() {
-		let elementTop = $(this).offset().top;
-		let elementBottom = elementTop + $(this).outerHeight();
-		let viewportTop = $(window).scrollTop();
-		let viewportBottom = viewportTop + $(window).height();
-		return elementBottom > viewportTop && elementTop < viewportBottom;
-	};
+	function isInViewport(myElement) {
+		var bounding = myElement.getBoundingClientRect();
+		return (bounding.top >= 0 && bounding.left >= 0 && bounding.right <= (window.innerWidth || document.documentElement.clientWidth) && bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight));
+	}
 	
 	let reachedTheEnd = false;
 	async function main_scroll() {
@@ -794,12 +788,12 @@ if (isPage_posts || isPage_fav) {
 		let curMatch = /pid=([0-9]*)/gm.exec(add);
 		let cur = curMatch == null ? 0 : parseInt(curMatch[1]);
 
+		
 		let loadNext = true;
-		$(window).on('DOMContentLoaded load resize scroll', async function() {
+		window.addEventListener("scroll", async function() {
 			if (reachedTheEnd) { return; }
 			if (!endlessScrolling) { return; }
-		  	
-			if ($('#paginator').isInViewport() && loadNext) {
+			if (isInViewport(document.querySelector("#paginator")) && loadNext) {
 				loadNext = false;
 				cur += step;
 				
@@ -828,7 +822,7 @@ if (isPage_posts || isPage_fav) {
 		});
 	};
 	
-	$(document).ready(function() { main_scroll(); });
+	main_scroll();
 }
 
 // post view (default vol, size the image/vid, add buttons)
