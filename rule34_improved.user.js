@@ -29,12 +29,11 @@ var enableFavOnEnter_          = "enableFavOnEnter";          var enableFavOnEnt
 var hideBlacklistedThumbnails_ = "hideBlacklistedThumbnails"; var hideBlacklistedThumbnails = GM_getValue(hideBlacklistedThumbnails_, true  ); recheckS(hideBlacklistedThumbnails_ , hideBlacklistedThumbnails);
 var forceDarkTheme_            = "forceDarkTheme";            var forceDarkTheme            = GM_getValue(forceDarkTheme_           , true  ); recheckS(forceDarkTheme_            , forceDarkTheme           );
 var betterDarkTheme_           = "betterDarkTheme";           var betterDarkTheme           = GM_getValue(betterDarkTheme_          , true  ); recheckS(betterDarkTheme_           , betterDarkTheme          );
-var removeHentaiClickerGame_   = "removeHentaiClickerGame";   var removeHentaiClickerGame   = GM_getValue(removeHentaiClickerGame_  , true  ); recheckS(removeHentaiClickerGame_   , removeHentaiClickerGame  );
+var removeBloat_               = "removeBloat";               var removeBloat               = GM_getValue(removeBloat_              , true  ); recheckS(removeBloat_               , removeBloat              );
 var endlessScrolling_          = "endlessScrolling";          var endlessScrolling          = GM_getValue(endlessScrolling_         , true  ); recheckS(endlessScrolling_          , endlessScrolling         );
 var favFilter_                 = "favFilter";                 var favFilter                 = GM_getValue(favFilter_                , true  ); recheckS(favFilter_                 , favFilter                );
 var showFavPosts_              = "showFavPosts";              var showFavPosts              = GM_getValue(showFavPosts_             , true  ); recheckS(showFavPosts_              , showFavPosts             );
 var showFavPosts2_             = "showFavPosts2";             var showFavPosts2             = GM_getValue(showFavPosts2_            , true  ); recheckS(showFavPosts2_             , showFavPosts2            );
-
 
 var betterDarkThemeCss = `
 * { --c-bg: #101010; --c-bg-alt: #101010; --c-bg-highlight: #202020; }
@@ -300,17 +299,21 @@ $(window).on('load', async function() {
 	}
 });
 
-if (removeHentaiClickerGame) {
+if (removeBloat) {
 	let items = document.getElementsByTagName("a");
 	for (i = items.length - 1; i >= 0; i--) {
 		if (items[i].href.includes("clicker")) { items[i].remove(); break; }
+		if (items[i].href.includes("https://rule34.xxx/hwspecial.php")) { items[i].remove(); break; }
 	}
 }
 
 if (forceDarkTheme) {
 	// disable default css
-	document.querySelectorAll('link[rel=stylesheet]').forEach(function(node) { if (node.href.includes("desktop.css")) { node.disabled = true; } });
-	
+	document.querySelectorAll('link[rel=stylesheet]').forEach(function(node) {
+		if (node.href.includes("desktop.css")) { node.disabled = true; }
+		if (node.href.includes("css/h2-mobile.css?v3")) { node.disabled = true; }
+	});
+  
 	// append dark theme
 	let head  = document.getElementsByTagName('head')[0];
 	let link  = document.createElement('link');
@@ -424,7 +427,7 @@ if (isPage_opt) {
 	makeCB_form(hideBlacklistedThumbnails_ , hideBlacklistedThumbnails , "Hide Blacklisted Thumbnails", "Hide blacklisted thumbnails on the front page." );
 	makeCB_form(forceDarkTheme_            , forceDarkTheme            , "Force Dark Theme",            "Force rule34's dark theme on every page, even if light theme is set in the options" );
 	makeCB_form(betterDarkTheme_           , betterDarkTheme           , "Better Dark Theme",           "(must enable 'Force Dark Theme') Use a custom CSS dark theme with the rule34's dark theme" );     
-	makeCB_form(removeHentaiClickerGame_   , removeHentaiClickerGame   , "Remove Hentai Clicker Game",  "Remove the hentai clicker game AD" );
+	makeCB_form(removeBloat_               , removeBloat               , "Remove Bloat",                "Removes: hentai clicker game AD, and other bullshit." );
 	makeCB_form(endlessScrolling_          , endlessScrolling          , "Endless Scrolling",           "When you get to the bottom of the current page it will automatically append the content from the next page on the current page" );
 	makeCB_form(favFilter_                 , favFilter                 , "Favorites Filter",            "Adds a searchbox for tag(s) in favorites" );
 	makeCB_form(showFavPosts_              , showFavPosts              , "Show Fav Posts",              "Shows you which posts are in your favorites while browsing" );
