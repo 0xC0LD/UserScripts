@@ -308,7 +308,7 @@ if (forceDarkTheme) {
 	// disable default css
 	document.querySelectorAll('link[rel=stylesheet]').forEach(function(node) {
 		if (node.href.includes("desktop.css")) { node.disabled = true; }
-		if (node.href.includes("css/h2-mobile.css?v3")) { node.disabled = true; }
+		if (node.href.includes("h2-mobile.css")) { node.disabled = true; }
 	});
   
 	// append dark theme
