@@ -32,7 +32,7 @@ var removeBloat_               = "removeBloat";               var removeBloat   
 var endlessScrolling_          = "endlessScrolling";          var endlessScrolling          = GM_getValue(endlessScrolling_         , true  ); recheckS(endlessScrolling_          , endlessScrolling         );
 var favFilter_                 = "favFilter";                 var favFilter                 = GM_getValue(favFilter_                , true  ); recheckS(favFilter_                 , favFilter                );
 var showFavPosts_              = "showFavPosts";              var showFavPosts              = GM_getValue(showFavPosts_             , true  ); recheckS(showFavPosts_              , showFavPosts             );
-var showFavPosts2_             = "showFavPosts2";             var showFavPosts2             = GM_getValue(showFavPosts2_            , true  ); recheckS(showFavPosts2_             , showFavPosts2            );
+var showFavPosts2_             = "showFavPosts2";             var showFavPosts2             = GM_getValue(showFavPosts2_            , false ); recheckS(showFavPosts2_             , showFavPosts2            );
 var embedVideo_                = "embedVideo";                var embedVideo                = GM_getValue(embedVideo_               , true  ); recheckS(embedVideo_                , embedVideo               );
 
 var betterDarkThemeCss = `
