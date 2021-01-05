@@ -33,6 +33,7 @@ var endlessScrolling_          = "endlessScrolling";          var endlessScrolli
 var favFilter_                 = "favFilter";                 var favFilter                 = GM_getValue(favFilter_                , true  ); recheckS(favFilter_                 , favFilter                );
 var showFavPosts_              = "showFavPosts";              var showFavPosts              = GM_getValue(showFavPosts_             , true  ); recheckS(showFavPosts_              , showFavPosts             );
 var showFavPosts2_             = "showFavPosts2";             var showFavPosts2             = GM_getValue(showFavPosts2_            , true  ); recheckS(showFavPosts2_             , showFavPosts2            );
+var embedVideo_                = "embedVideo";                var embedVideo                = GM_getValue(embedVideo_               , true  ); recheckS(embedVideo_                , embedVideo               );
 
 var betterDarkThemeCss = `
 * { --c-bg: #101010; --c-bg-alt: #101010; --c-bg-highlight: #202020; }
@@ -429,7 +430,7 @@ if (isPage_opt) {
 	makeCB_form(favFilter_                 , favFilter                 , "Favorites Filter",            "Adds a searchbox for tag(s) in favorites" );
 	makeCB_form(showFavPosts_              , showFavPosts              , "Show Fav Posts",              "Shows you which posts are in your favorites while browsing" );
 	makeCB_form(showFavPosts2_             , showFavPosts2             , "Hide Fav Posts",              "(must enable 'Show Fav Posts') Hides favorites while browsing" );
-
+	makeCB_form(embedVideo_                , embedVideo                , "Embed Video",                 "replace rule34's player with the default player" );
 }
 
 if (isPage_fav) {
@@ -920,4 +921,18 @@ if (isPage_post) {
 			navbar.appendChild(div);
 		}
 	}
+	
+	if (embedVideo) {
+		let player = document.getElementById("gelcomVideoContainer");
+		if (player != null) {
+			let vid = document.createElement("video");
+			vid.id = "gelcomVideoContainer";
+			vid.controls = true; 
+			vid.style.cssText = player.style.cssText;
+			let link = document.querySelector(".sidebar > div:nth-child(9) > ul:nth-child(2) > li:nth-child(2) > a:nth-child(1)");
+			vid.src = link.href;
+			player.parentNode.replaceChild(vid, player);
+		}
+	}
+	
 }
