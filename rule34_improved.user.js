@@ -284,6 +284,19 @@ function favPost(id, close = false) {
 	}, 100);
 }
 
+function httpGet(url, callback, async) {
+    let xhr = new XMLHttpRequest();
+    xhr.open("GET", url, async);
+    xhr.onload = function (e) {
+        if (xhr.readyState === 4) {
+            // xhr.status === 200
+            callback(xhr.responseText);
+        }
+    };
+    xhr.onerror = function (e) { console.error(xhr.statusText); };
+    xhr.send(null); 
+}
+
 function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
 var originalTitle = document.title;
 var isPage_post = document.location.href.includes("index.php?page=post&s=view");
@@ -659,15 +672,8 @@ if (showFavPosts) {
 		}
 		
 		// stuff to update list
-		let shouldStop = false;
-		let status;
-		let btn_stopUpdate = document.createElement("button");
-		btn_stopUpdate.style = "display: block;";
-		btn_stopUpdate.title = "Stop the update";
-		btn_stopUpdate.innerHTML = "Stop";
-		btn_stopUpdate.onclick = function() { shouldStop = true; };
 		// status
-		status = document.createElement("div");
+		let status = document.createElement("div");
 		status.id = "favlistStatus";
 		status.style = "display: block;";
 		status.title = "processed\nfavlist count\nadded";
@@ -695,25 +701,19 @@ if (showFavPosts) {
 			// start search
 			for (; cur <= max; cur += step) {
 				let url = base + "&pid=" + cur;
-				let ifr = document.createElement("iframe");
-				ifr.style = "display: none";
-				ifr.src = url;
-				ifr.onload = function() {
-					let elements = ifr.contentWindow.document.getElementsByClassName("thumb");
+				
+				httpGet(url, function(response) {
+					let doc = new DOMParser().parseFromString(response, "text/html");
+					let elements = doc.getElementsByClassName("thumb");
 					for (let i = 0; i < elements.length; i++) {
 						let id = elements[i].childNodes[0].id.replace('p', '');
 						if (!favlist.includes(id)) { favlist.push(id); added++; }
 						c++;
 						status.innerHTML = c + "<br>" + favlist.length + "<br>" + added;
 					}
-					ifr.parentNode.removeChild(ifr);
-				}
-				document.body.appendChild(ifr);
+				}, false);
 				
-				await sleep(1000);
 				GM_setValue("favlist", favlist);
-				
-				if (shouldStop) { shouldStop = false; return; }
 			}
 		}
 		btn_updatefav.onclick = function() { getIds(); };
@@ -721,7 +721,6 @@ if (showFavPosts) {
 		let favlistCont = document.createElement("div");
 		favlistCont.style = "position: fixed; top: 30px; right: 5px;";
 		favlistCont.appendChild(btn_updatefav);
-		favlistCont.appendChild(btn_stopUpdate);
 		favlistCont.appendChild(status);
 		document.body.appendChild(favlistCont);
 	}
