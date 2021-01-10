@@ -35,6 +35,8 @@ var showFavPosts_              = "showFavPosts";              var showFavPosts  
 var showFavPosts2_             = "showFavPosts2";             var showFavPosts2             = GM_getValue(showFavPosts2_            , false ); recheckS(showFavPosts2_             , showFavPosts2            );
 var embedVideo_                = "embedVideo";                var embedVideo                = GM_getValue(embedVideo_               , true  ); recheckS(embedVideo_                , embedVideo               );
 
+let favlist = GM_getValue("favlist", []);
+
 var betterDarkThemeCss = `
 * { --c-bg: #101010; --c-bg-alt: #101010; --c-bg-highlight: #202020; }
 
@@ -260,8 +262,6 @@ var heartStyle = `
 `
 
 /// TODO:
-//    - recode endless scrolling/favfilter use 'thumb' class instead of 'img' tag
-//    - remove sleep() ... instead wait for the server to respond then continue
 //    - inject custom checkbox css / radio button css
 //    - add fav button while browsing in thumb div
 
@@ -270,12 +270,10 @@ function favPost(id, close = false) {
 	addFav(id); // add to fav
 	// add to favlist (+close)
 	var timer = setInterval(function() {
-		console.log(1);
 		var selectElement = document.getElementById("notice");
 		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
 			clearInterval(timer);
 			if (showFavPosts) {
-				let favlist = GM_getValue("favlist", []);
 				let id = document.location.href.split("id=")[1];
 				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
 			}
@@ -304,6 +302,55 @@ var isPage_posts = document.location.href.includes("index.php?page=post&s=list")
 var isPage_fav = document.location.href.includes("index.php?page=favorites&s=view");
 var isPage_opt = document.location.href.includes("index.php?page=account&s=options");
 
+function getPostID(element) {
+	let id = element.id.replace('s', '');
+	if (id != "") { return id; }
+	
+	return element.childNodes[0].id.replace('p', '');
+}
+
+function showFavPosts_check(element) {
+	
+	if (element == null
+	||  element.className == "thumb fav"
+	|| !favlist.includes(getPostID(element))
+	) { return }
+	
+	if (showFavPosts2) { element.remove(); return; }
+	let heart = document.createElement("div");
+	heart.style = heartStyle;
+	heart.innerHTML = "❤️";
+	element.className = "thumb fav";
+	element.childNodes[0].style = "position: relative; width: auto; height: auto;"
+	element.childNodes[0].appendChild(heart);
+	element.childNodes[0].childNodes[0].style = favedPostStyle;
+}
+
+function showFavPosts_injectRemoveCode(element) {
+	
+	let rm = element.childNodes[2];
+	if (rm == undefined || rm == null) { return; }
+	rm.remove();
+	
+	let id = element.childNodes[0].id.replace('p', '');
+	
+	let btn = document.createElement("button");
+	btn.className = "button-remove";
+	btn.title = "remove: " + id;
+	btn.innerHTML = "❌REMOVE❌";
+	btn.onclick = function() {
+		GM_setValue("favlist", favlist.filter(e => e !== id));
+		document.location = 'index.php?page=favorites&s=delete&id=' + id;
+	};
+	element.appendChild(btn);
+}
+
+function hideBlacklistedThumbnails_check(element) {
+	if (element == null
+	 || element.className != "thumb blacklisted-image"
+	) { return; }
+	element.remove();
+}
 
 if (hideBlacklistedThumbnails) {
 	let elements = document.getElementsByClassName("thumb blacklisted-image");
@@ -470,7 +517,9 @@ if (isPage_fav) {
 		// start search
 		let base = /(.*)&pid=/gm.exec(document.location.href) == null ? document.location.href : /(.*)&pid=/gm.exec(document.location.href)[1];
 		let reg = /pid=([0-9]*)/gm;
-
+		
+		let paginator = document.getElementById("paginator");
+		
 		let cont = document.getElementById("favcontrols");
 
 		// textbox for tags
@@ -618,22 +667,11 @@ if (isPage_fav) {
 
 if (showFavPosts) {
 	
-	let favlist = GM_getValue("favlist", []);
-	
 	// filtering
 	if (isPage_posts) {
 		let elements = document.querySelectorAll(".thumb");
 		for (let i = 0; i < elements.length; i++) {
-			let id = elements[i].id.replace('s', '');
-			if (favlist.includes(id)) {
-				if (showFavPosts2) {  elements[i].remove(); continue; }
-				let heart = document.createElement("div");
-				heart.style = heartStyle;
-				heart.innerHTML = "❤️";
-				elements[i].childNodes[0].style = "position: relative; width: auto; height: auto;"
-				elements[i].childNodes[0].appendChild(heart);
-				elements[i].childNodes[0].childNodes[0].style = favedPostStyle;
-			}
+			showFavPosts_check(elements[i]);
 		}
 	}
 	
@@ -642,33 +680,8 @@ if (showFavPosts) {
 		// show fav posts
 		let elements = document.querySelectorAll(".thumb");
 		for (let i = 0; i < elements.length; i++) {
-			let id = elements[i].childNodes[0].id.replace('p', '');
-			if (favlist.includes(id)) {
-				if (showFavPosts2) { elements[i].remove(); continue; }
-				let heart = document.createElement("div");
-				heart.style = heartStyle;
-				heart.innerHTML = "❤️";
-				elements[i].childNodes[0].style = "position: relative; width: auto; height: auto;"
-				elements[i].childNodes[0].appendChild(heart);
-				elements[i].childNodes[0].childNodes[0].style = favedPostStyle;
-			}
-		}
-		
-		for (let i = 0; i < elements.length; i++) {
-			let id = elements[i].childNodes[0].id.replace('p', '');
-			let rm = elements[i].childNodes[2];
-			if (rm != undefined) { rm.remove(); }
-			
-			let btn = document.createElement("button");
-			btn.className = "button-remove";
-			btn.title = "remove: " + id;
-			btn.innerHTML = "❌REMOVE❌";
-			btn.onclick = function() {
-				let favlist = GM_getValue("favlist", []);
-				GM_setValue("favlist", favlist.filter(e => e !== id));
-				document.location = 'index.php?page=favorites&s=delete&id=' + id;
-			};
-			elements[i].appendChild(btn);
+			showFavPosts_check(elements[i]);
+			showFavPosts_injectRemoveCode(elements[i]);
 		}
 		
 		// stuff to update list
@@ -788,37 +801,31 @@ if (isPage_posts || isPage_fav) {
 		let curMatch = /pid=([0-9]*)/gm.exec(add);
 		let cur = curMatch == null ? 0 : parseInt(curMatch[1]);
 
+		let paginator = document.getElementById("paginator");
 		
-		let loadNext = true;
 		window.addEventListener("scroll", async function() {
-			if (reachedTheEnd) { return; }
+			if (reachedTheEnd || !endlessScrolling || !isInViewport(paginator)) { return; }
 			if (!endlessScrolling) { return; }
-			if (isInViewport(document.querySelector("#paginator")) && loadNext) {
-				loadNext = false;
-				cur += step;
-				
-				let url = base + "&pid=" + cur;
-				let ifr = document.createElement("iframe");
-				ifr.style = "display: none;";
-				ifr.src = url;
-				ifr.onload = function() {
-					document.title = originalTitle;
-					var elements = Array.prototype.slice.call(ifr.contentWindow.document.getElementsByClassName("thumb"), 0);
-					if (elements.length == 0) { reachedTheEnd = true; return; }
-					for (let i = 0; i < elements.length; i++) {
-						let p = document.getElementById("paginator");
-						p.parentNode.insertBefore(elements[i], p);
-					}
-					ifr.parentNode.removeChild(ifr);
-					p.innerHTML = cur + " (" + ((cur+step)/step) + ")";
+			
+			cur += step;
+			let url = base + "&pid=" + cur;
+			
+			document.title = "Loading...";
+			
+			httpGet(url, function(response) {
+				document.title = originalTitle;
+				let doc = new DOMParser().parseFromString(response, "text/html");
+				//let elements = doc.getElementsByClassName("thumb");
+				let elements = Array.prototype.slice.call(doc.getElementsByClassName("thumb"), 0);
+				if (elements.length == 0) { reachedTheEnd = true; return; }
+				for (let i = 0; i < elements.length; i++) {
+					paginator.parentNode.insertBefore(elements[i], paginator);
+					showFavPosts_check(elements[i]);
+					hideBlacklistedThumbnails_check(elements[i]);
+					showFavPosts_injectRemoveCode(elements[i]);
 				}
-
-				document.title = "Loading...";
-				document.body.appendChild(ifr);
-				
-				await sleep(1000);
-				loadNext = true;
-			}
+				p.innerHTML = cur + " (" + ((cur+step)/step) + ")";
+			}, false);
 		});
 	};
 	
@@ -911,7 +918,6 @@ if (isPage_post) {
   
 	// show if a post is in fav
 	if (showFavPosts) {
-		let favlist = GM_getValue("favlist", []);
 		if (favlist.includes(postID)) {
 			let div = document.createElement("div");
 			div.id = "isinfav";
