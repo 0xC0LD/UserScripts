@@ -275,7 +275,8 @@ function favPost(id, close = false) {
 			clearInterval(timer);
 			if (showFavPosts) {
 				let id = document.location.href.split("id=")[1];
-				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
+				let favl = GM_getValue("favlist", []);
+				if (!favl.includes(id)) { favl.push(id); GM_setValue("favlist", favl); }
 			}
 			if (close) { window.close(); }
 		}
