@@ -267,15 +267,17 @@ var heartStyle = `
 function favPost(id, close = false) {
 	post_vote(id, 'up'); // like
 	addFav(id); // add to fav
+	
+	if (showFavPosts) {
+		let favlist = GM_getValue("favlist", []);
+		if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
+	}
+	
 	// add to favlist (+close)
 	var timer = setInterval(function() {
 		var selectElement = document.getElementById("notice");
 		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
 			clearInterval(timer);
-			if (showFavPosts) {
-				let favlist = GM_getValue("favlist", []);
-				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
-			}
 			if (close) { window.close(); }
 		}
 	}, 100);
@@ -412,8 +414,9 @@ if (hideBlacklistedThumbnails) {
 if (removeBloat) {
 	let items = document.getElementsByTagName("a");
 	for (i = items.length - 1; i >= 0; i--) {
-		if (items[i].href.includes("clicker")) { items[i].remove(); break; }
-		if (items[i].href.includes("https://rule34.xxx/hwspecial.php")) { items[i].remove(); break; }
+		//if (items[i].href.includes("clicker")) { items[i].remove(); }
+		if (items[i].href.includes("https://rule34.xxx/hwspecial.php")) { items[i].remove(); }
+		if (items[i].href.includes("https://buymyshit.moneygrubbingwhore.com")) { items[i].remove(); }
 	}
 }
 
@@ -992,9 +995,7 @@ if (isPage_post) {
 			vid.id = "gelcomVideoContainer";
 			vid.controls = true; 
 			vid.style.cssText = player.style.cssText;
-			
 			let link = document.getElementById('stats').nextElementSibling.childNodes[3].childNodes[3].childNodes[0]
-			
 			vid.src = link.href;
 			player.parentNode.replaceChild(vid, player);
 		}
