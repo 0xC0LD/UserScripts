@@ -36,8 +36,6 @@ var showFavPosts2_             = "showFavPosts2";             var showFavPosts2 
 var embedVideo_                = "embedVideo";                var embedVideo                = GM_getValue(embedVideo_               , true  ); recheckS(embedVideo_                , embedVideo               );
 var thumbFav_                  = "thumbFav";                  var thumbFav                  = GM_getValue(thumbFav_                 , true  ); recheckS(thumbFav_                  , thumbFav                 );
 
-let favlist = GM_getValue("favlist", []);
-
 var betterDarkThemeCss = `
 * { --c-bg: #101010; --c-bg-alt: #101010; --c-bg-highlight: #202020; }
 
@@ -269,12 +267,18 @@ var heartStyle = `
 function favPost(id, close = false) {
 	post_vote(id, 'up'); // like
 	addFav(id); // add to fav
-	
-	if (showFavPosts) {
-		if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
-	}
-	
-	if (close) { window.close(); }
+	// add to favlist (+close)
+	var timer = setInterval(function() {
+		var selectElement = document.getElementById("notice");
+		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
+			clearInterval(timer);
+			if (showFavPosts) {
+				let favlist = GM_getValue("favlist", []);
+				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
+			}
+			if (close) { window.close(); }
+		}
+	}, 100);
 }
 
 function httpGet(url, callback, async) {
@@ -305,6 +309,8 @@ function getPostID(element) {
 }
 
 function showFavPosts_check(element) {
+	
+	let favlist = GM_getValue("favlist", []);
 	
 	if (element == null
 	||  element.className == "thumb fav"
@@ -339,6 +345,7 @@ function showFavPosts_injectRemoveCode(element) {
 	btn.title = "remove: " + id;
 	btn.innerHTML = "❌REMOVE❌";
 	btn.onclick = function() {
+		let favlist = GM_getValue("favlist", []);
 		GM_setValue("favlist", favlist.filter(e => e !== id));
 		document.location = 'index.php?page=favorites&s=delete&id=' + id;
 	};
@@ -723,6 +730,8 @@ if (showFavPosts) {
 	
 	if (isPage_fav) {
 		
+		let favlist = GM_getValue("favlist", []);
+		
 		// show fav posts
 		let elements = document.querySelectorAll(".thumb");
 		for (let i = 0; i < elements.length; i++) {
@@ -760,6 +769,8 @@ if (showFavPosts) {
 			// start search
 			for (; cur <= max; cur += step) {
 				let url = base + "&pid=" + cur;
+				
+				let favlist = GM_getValue("favlist", []);
 				
 				httpGet(url, function(response) {
 					let doc = new DOMParser().parseFromString(response, "text/html");
@@ -964,6 +975,7 @@ if (isPage_post) {
   
 	// show if a post is in fav
 	if (showFavPosts) {
+		let favlist = GM_getValue("favlist", []);
 		if (favlist.includes(postID)) {
 			let div = document.createElement("div");
 			div.id = "isinfav";
