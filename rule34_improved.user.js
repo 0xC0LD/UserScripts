@@ -34,6 +34,7 @@ var favFilter_                 = "favFilter";                 var favFilter     
 var showFavPosts_              = "showFavPosts";              var showFavPosts              = GM_getValue(showFavPosts_             , true  ); recheckS(showFavPosts_              , showFavPosts             );
 var showFavPosts2_             = "showFavPosts2";             var showFavPosts2             = GM_getValue(showFavPosts2_            , false ); recheckS(showFavPosts2_             , showFavPosts2            );
 var embedVideo_                = "embedVideo";                var embedVideo                = GM_getValue(embedVideo_               , true  ); recheckS(embedVideo_                , embedVideo               );
+var thumbFav_                  = "thumbFav";                  var thumbFav                  = GM_getValue(thumbFav_                 , true  ); recheckS(thumbFav_                  , thumbFav                 );
 
 let favlist = GM_getValue("favlist", []);
 
@@ -268,19 +269,12 @@ var heartStyle = `
 function favPost(id, close = false) {
 	post_vote(id, 'up'); // like
 	addFav(id); // add to fav
-	// add to favlist (+close)
-	var timer = setInterval(function() {
-		var selectElement = document.getElementById("notice");
-		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
-			clearInterval(timer);
-			if (showFavPosts) {
-				let id = document.location.href.split("id=")[1];
-				let favl = GM_getValue("favlist", []);
-				if (!favl.includes(id)) { favl.push(id); GM_setValue("favlist", favl); }
-			}
-			if (close) { window.close(); }
-		}
-	}, 100);
+	
+	if (showFavPosts) {
+		if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
+	}
+	
+	if (close) { window.close(); }
 }
 
 function httpGet(url, callback, async) {
@@ -325,6 +319,11 @@ function showFavPosts_check(element) {
 	element.childNodes[0].style = "position: relative; width: auto; height: auto;"
 	element.childNodes[0].appendChild(heart);
 	element.childNodes[0].childNodes[0].style = favedPostStyle;
+	
+	if (thumbFav) {
+		element.onmouseenter = null;
+		element.onmouseleave = null;
+	}
 }
 
 function showFavPosts_injectRemoveCode(element) {
@@ -351,6 +350,51 @@ function hideBlacklistedThumbnails_check(element) {
 	 || element.className != "thumb blacklisted-image"
 	) { return; }
 	element.remove();
+}
+
+function thumbFav_check(element) {
+	
+	if (element == null
+	||  element.className == "thumb fav"
+	||  element.classname == "thumb 4fav"
+	) { return }
+	
+	element.className = "thumb 4fav";
+	element.style.position = "relative";
+		
+	let tag = document.createElement('button');
+	tag.innerHTML = "♥";
+	tag.title = "Add to favorites";
+	tag.style.position = "absolute";
+	tag.style.top = "20%";
+	tag.style.left = "80%";
+	tag.style.width = "20%";
+	tag.style.height = "20%";
+	tag.style.color = "#ffffff";
+	tag.style.textAlign = "#center";
+	tag.style.font  = "normal bold 19px arial,serif";
+	tag.style.border = "solid 3px red";
+	tag.style.backgroundColor  = "rgba(20, 20, 20, .8)";
+	tag.style.transform = "translate(-50%, -50%)";
+	tag.style.display = "none";
+	
+	element.appendChild(tag);
+	
+	tag.onmousedown = function() {
+		tag.remove();
+		favPost(getPostID(element));
+		showFavPosts_check(element);
+	};
+		
+	element.onmouseenter = function() { tag.style.display = "block"; };
+	element.onmouseleave = function() { tag.style.display = "none";  };
+}
+
+if (thumbFav) {
+	
+	let elements = document.getElementsByClassName("thumb");
+	
+	for (let i = 0; i < elements.length; i++) { thumbFav_check(elements[i]); }
 }
 
 if (hideBlacklistedThumbnails) {
@@ -492,6 +536,7 @@ if (isPage_opt) {
 	makeCB_form(showFavPosts_              , showFavPosts              , "Show Fav Posts",              "Shows you which posts are in your favorites while browsing" );
 	makeCB_form(showFavPosts2_             , showFavPosts2             , "Hide Fav Posts",              "(must enable 'Show Fav Posts') Hides favorites while browsing" );
 	makeCB_form(embedVideo_                , embedVideo                , "Embed Video",                 "replace rule34's player with the default player" );
+	makeCB_form(thumbFav_                  , thumbFav                  , "Thumb Fav",                   "add fav button while browsing on post's thumbnail" );
 }
 
 if (isPage_fav) {
@@ -821,9 +866,9 @@ if (isPage_posts || isPage_fav) {
 				if (elements.length == 0) { reachedTheEnd = true; return; }
 				for (let i = 0; i < elements.length; i++) {
 					paginator.parentNode.insertBefore(elements[i], paginator);
-					showFavPosts_check(elements[i]);
-					hideBlacklistedThumbnails_check(elements[i]);
-					showFavPosts_injectRemoveCode(elements[i]);
+					if (hideBlacklistedThumbnails) { hideBlacklistedThumbnails_check(elements[i]); }
+					if (showFavPosts)              { showFavPosts_check(elements[i]); showFavPosts_injectRemoveCode(elements[i]); }
+					if (thumbFav)                  { thumbFav_check(elements[i]); }
 				}
 				p.innerHTML = cur + " (" + ((cur+step)/step) + ")";
 			}, false);
@@ -935,7 +980,9 @@ if (isPage_post) {
 			vid.id = "gelcomVideoContainer";
 			vid.controls = true; 
 			vid.style.cssText = player.style.cssText;
-			let link = document.querySelector(".sidebar > div:nth-child(9) > ul:nth-child(2) > li:nth-child(2) > a:nth-child(1)");
+			
+			let link = document.getElementById('stats').nextElementSibling.childNodes[3].childNodes[3].childNodes[0]
+			
 			vid.src = link.href;
 			player.parentNode.replaceChild(vid, player);
 		}
