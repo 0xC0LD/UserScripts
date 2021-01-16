@@ -264,20 +264,46 @@ var heartStyle = `
 //    - inject custom checkbox css / radio button css
 //    - add fav button while browsing in thumb div
 
-function favPost(id, close = false) {
+function showFavPosts_check(element) {
+	
+	if (element == null
+	||  element.className == "thumb fav"
+	|| !GM_getValue("favlist", []).includes(getPostID(element))
+	) { return }
+	
+	if (showFavPosts2) { element.remove(); return; }
+	let heart = document.createElement("div");
+	heart.style = heartStyle;
+	heart.innerHTML = "❤️";
+	element.className = "thumb fav";
+	element.childNodes[0].style = "position: relative; width: auto; height: auto;"
+	element.childNodes[0].appendChild(heart);
+	element.childNodes[0].childNodes[0].style = favedPostStyle;
+	
+	if (thumbFav) {
+		element.onmouseenter = null;
+		element.onmouseleave = null;
+	}
+}
+
+function favPost(id, close = false, element = null) {
 	post_vote(id, 'up'); // like
 	addFav(id); // add to fav
-	
-	if (showFavPosts) {
-		let favlist = GM_getValue("favlist", []);
-		if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
-	}
 	
 	// add to favlist (+close)
 	var timer = setInterval(function() {
 		var selectElement = document.getElementById("notice");
 		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
 			clearInterval(timer);
+			
+			if (showFavPosts) {
+				let favlist = GM_getValue("favlist", []);
+				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
+			}
+			
+			// if element is passed
+			showFavPosts_check(element);
+			
 			if (close) { window.close(); }
 		}
 	}, 100);
@@ -310,29 +336,7 @@ function getPostID(element) {
 	return element.childNodes[0].id.replace('p', '');
 }
 
-function showFavPosts_check(element) {
-	
-	let favlist = GM_getValue("favlist", []);
-	
-	if (element == null
-	||  element.className == "thumb fav"
-	|| !favlist.includes(getPostID(element))
-	) { return }
-	
-	if (showFavPosts2) { element.remove(); return; }
-	let heart = document.createElement("div");
-	heart.style = heartStyle;
-	heart.innerHTML = "❤️";
-	element.className = "thumb fav";
-	element.childNodes[0].style = "position: relative; width: auto; height: auto;"
-	element.childNodes[0].appendChild(heart);
-	element.childNodes[0].childNodes[0].style = favedPostStyle;
-	
-	if (thumbFav) {
-		element.onmouseenter = null;
-		element.onmouseleave = null;
-	}
-}
+
 
 function showFavPosts_injectRemoveCode(element) {
 	
@@ -391,24 +395,21 @@ function thumbFav_check(element) {
 	
 	tag.onmousedown = function() {
 		tag.remove();
-		favPost(getPostID(element));
-		showFavPosts_check(element);
+		favPost(getPostID(element), false, element);
 	};
 		
 	element.onmouseenter = function() { tag.style.display = "block"; };
 	element.onmouseleave = function() { tag.style.display = "none";  };
 }
 
-if (thumbFav) {
-	
-	let elements = document.getElementsByClassName("thumb");
-	
-	for (let i = 0; i < elements.length; i++) { thumbFav_check(elements[i]); }
-}
-
 if (hideBlacklistedThumbnails) {
 	let elements = document.getElementsByClassName("thumb blacklisted-image");
 	while (elements[0]) { elements[0].remove(); }
+}
+
+if (thumbFav) {
+	let elements = document.getElementsByClassName("thumb");
+	for (let i = 0; i < elements.length; i++) { thumbFav_check(elements[i]); }
 }
 
 if (removeBloat) {
