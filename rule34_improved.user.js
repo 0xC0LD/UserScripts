@@ -16,6 +16,8 @@
 //|  If you want to edit settings, go to the options page of your account...
 //|
 
+// Imagus settings you should use -> http://prntscr.com/wxk1og
+
 function recheckS(s_, s) { if (GM_getValue(s_, null) == null) { GM_setValue(s_, s); } }
 
 var autoplayVideos_            = "autoplayVideos";            var autoplayVideos            = GM_getValue(autoplayVideos_           , false ); recheckS(autoplayVideos_            , autoplayVideos           );
@@ -264,6 +266,7 @@ var heartStyle = `
 //    - inject custom checkbox css / radio button css
 //    - add fav button while browsing in thumb div
 
+// add custom css to show that the post is in fav
 function showFavPosts_check(element) {
 	
 	if (element == null
@@ -286,29 +289,51 @@ function showFavPosts_check(element) {
 	}
 }
 
+function updateNavbar(postID) {
+	
+	if (!isPage_post || !showFavPosts) { return; }
+	let navbar = document.getElementById("subnavbar");
+	for (let i = 0; i < navbar.childNodes.length; i++) { if (navbar.childNodes[i].id == "isinfav") { return; } }
+	
+	if (GM_getValue("favlist", []).includes(postID)) {
+		let div = document.createElement("div");
+		div.id = "isinfav";
+		div.title = "Post is in Favorites."
+		div.innerHTML = "💟";
+		navbar.appendChild(div);
+	}
+}
+
+// add post to favorites, like it & add it to favlist
 function favPost(id, close = false, element = null) {
 	post_vote(id, 'up'); // like
 	addFav(id); // add to fav
 	
-	// add to favlist (+close)
+	// wait for server to respond
 	var timer = setInterval(function() {
 		var selectElement = document.getElementById("notice");
 		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
+			selectElement.innerHTML = "Post added to favorites & favlist";
 			clearInterval(timer);
 			
+			// add to favlist
 			if (showFavPosts) {
 				let favlist = GM_getValue("favlist", []);
 				if (!favlist.includes(id)) { favlist.push(id); GM_setValue("favlist", favlist); }
+				
+				// if element is passed
+				showFavPosts_check(element);
+				
+				// if on posts page update navbar
+				updateNavbar(id);
 			}
-			
-			// if element is passed
-			showFavPosts_check(element);
 			
 			if (close) { window.close(); }
 		}
 	}, 100);
 }
 
+// get page html
 function httpGet(url, callback, async) {
     let xhr = new XMLHttpRequest();
     xhr.open("GET", url, async);
@@ -329,15 +354,15 @@ var isPage_posts = document.location.href.includes("index.php?page=post&s=list")
 var isPage_fav = document.location.href.includes("index.php?page=favorites&s=view");
 var isPage_opt = document.location.href.includes("index.php?page=account&s=options");
 
+// get thumbnail post id
 function getPostID(element) {
 	let id = element.id.replace('s', '');
 	if (id != "") { return id; }
-	
 	return element.childNodes[0].id.replace('p', '');
 }
 
-
-
+// add extra code to remove the id from favlist
+// when you press the remove button on the favorites page
 function showFavPosts_injectRemoveCode(element) {
 	
 	let rm = element.childNodes[2];
@@ -358,6 +383,7 @@ function showFavPosts_injectRemoveCode(element) {
 	element.appendChild(btn);
 }
 
+// if blacklisted remove
 function hideBlacklistedThumbnails_check(element) {
 	if (element == null
 	 || element.className != "thumb blacklisted-image"
@@ -365,6 +391,7 @@ function hideBlacklistedThumbnails_check(element) {
 	element.remove();
 }
 
+// add fav button on post
 function thumbFav_check(element) {
 	
 	if (element == null
@@ -418,6 +445,7 @@ if (removeBloat) {
 		//if (items[i].href.includes("clicker")) { items[i].remove(); }
 		if (items[i].href.includes("https://rule34.xxx/hwspecial.php")) { items[i].remove(); }
 		if (items[i].href.includes("https://buymyshit.moneygrubbingwhore.com")) { items[i].remove(); }
+		// will add more if rule34 adds more
 	}
 }
 
@@ -441,6 +469,7 @@ if (forceDarkTheme) {
 	if (betterDarkTheme) { GM_addStyle(betterDarkThemeCss) }
 }
 
+// options page
 if (isPage_opt) {
 	
 	// if in options check dark theme
@@ -550,6 +579,7 @@ if (isPage_opt) {
 	makeCB_form(thumbFav_                  , thumbFav                  , "Thumb Fav",                   "add fav button while browsing on post's thumbnail" );
 }
 
+// favorites page
 if (isPage_fav) {
 	
 	// remove stupid <br>s on fav page wtf... why are they here
@@ -734,8 +764,6 @@ if (showFavPosts) {
 	
 	if (isPage_fav) {
 		
-		let favlist = GM_getValue("favlist", []);
-		
 		// show fav posts
 		let elements = document.querySelectorAll(".thumb");
 		for (let i = 0; i < elements.length; i++) {
@@ -752,7 +780,7 @@ if (showFavPosts) {
 		// update button
 		let btn_updatefav = document.createElement("button");
 		btn_updatefav.style = "display: block;";
-		btn_updatefav.title = "Updates favorites list (" + favlist.length + " ID(s))";
+		btn_updatefav.title = "Updates favorites list (" + GM_getValue("favlist", []).length + " ID(s))";
 		btn_updatefav.innerHTML = "Update";
 		async function getIds() {
 			let reg = /pid=([0-9]*)/gm;
@@ -773,9 +801,7 @@ if (showFavPosts) {
 			// start search
 			for (; cur <= max; cur += step) {
 				let url = base + "&pid=" + cur;
-				
 				let favlist = GM_getValue("favlist", []);
-				
 				httpGet(url, function(response) {
 					let doc = new DOMParser().parseFromString(response, "text/html");
 					let elements = doc.getElementsByClassName("thumb");
@@ -786,7 +812,6 @@ if (showFavPosts) {
 						status.innerHTML = c + "<br>" + favlist.length + "<br>" + added;
 					}
 				}, false);
-				
 				GM_setValue("favlist", favlist);
 			}
 		}
@@ -800,6 +825,7 @@ if (showFavPosts) {
 	}
 }
 
+// endless scrolling
 if (isPage_posts || isPage_fav) {
 	
 	let label = document.createElement("label");
@@ -856,23 +882,18 @@ if (isPage_posts || isPage_fav) {
 			}
 			default: return;
 		}
-		
 		let maxMatch = reg.exec(text);
 		let max = maxMatch == null ? 0 : parseInt(maxMatch[1]);
 		let curMatch = /pid=([0-9]*)/gm.exec(add);
 		let cur = curMatch == null ? 0 : parseInt(curMatch[1]);
-
 		let paginator = document.getElementById("paginator");
 		
 		window.addEventListener("scroll", async function() {
 			if (reachedTheEnd || !endlessScrolling || !isInViewport(paginator)) { return; }
 			if (!endlessScrolling) { return; }
-			
 			cur += step;
 			let url = base + "&pid=" + cur;
-			
 			document.title = "Loading...";
-			
 			httpGet(url, function(response) {
 				document.title = originalTitle;
 				let doc = new DOMParser().parseFromString(response, "text/html");
@@ -896,10 +917,11 @@ if (isPage_posts || isPage_fav) {
 // post view (default vol, size the image/vid, add buttons)
 if (isPage_post) {
 	
+	// set vars
+	let postID = document.location.href.split("id=")[1];
+	
 	if (enableFavOnEnter) {
 		document.onkeydown = function(e) {
-			let postID = document.location.href.split("id=")[1];
-
 			var event = document.all ? window.event : e;
 			switch (e.target.tagName.toLowerCase()) {
 				case "input":
@@ -913,9 +935,6 @@ if (isPage_post) {
 		}
 	}
 	
-	// set vars
-	let postID = document.location.href.split("id=")[1];
-	
 	// add custom css
 	GM_addStyle(postCss);
 	
@@ -924,7 +943,6 @@ if (isPage_post) {
 	if (vid) {
 		vid.volume = defaultVideoVolume;
 		if (autoplayVideos) { vid.autoplay = true; }
-		
 		if (!stretchImgVid && trueVideoSize) {
 			let size = document.querySelector("#stats > ul:nth-child(2) > li:nth-child(3)").innerHTML.split(": ")[1];
 			let wNh = size.split("x");
@@ -978,16 +996,7 @@ if (isPage_post) {
 	navbar.appendChild(cont);
   
 	// show if a post is in fav
-	if (showFavPosts) {
-		let favlist = GM_getValue("favlist", []);
-		if (favlist.includes(postID)) {
-			let div = document.createElement("div");
-			div.id = "isinfav";
-			div.title = "Post is in Favorites."
-			div.innerHTML = "💟";
-			navbar.appendChild(div);
-		}
-	}
+	updateNavbar(postID);
 	
 	if (embedVideo) {
 		let player = document.getElementById("gelcomVideoContainer");
