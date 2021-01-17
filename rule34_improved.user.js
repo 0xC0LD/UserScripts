@@ -313,7 +313,7 @@ function favPost(id, close = false, element = null) {
 	var timer = setInterval(function() {
 		var selectElement = document.getElementById("notice");
 		if (selectElement.innerHTML == "Post added to favorites" || selectElement.innerHTML == "Post already in your favorites") {
-			selectElement.innerHTML = "Post added to favorites & favlist";
+			selectElement.innerHTML = selectElement.innerHTML + " & favlist";
 			clearInterval(timer);
 			
 			// add to favlist
