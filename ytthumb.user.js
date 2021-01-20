@@ -78,10 +78,11 @@ function createButton(url) {
 	btn.href = url;
 	btn.title = url.split('/').pop() + " (" + url + ")";
 	
-	let added = false;
-	let els = document.getElementsByClassName("title style-scope ytd-video-primary-info-renderer");
-	for (let i = 0; i < els.length; i++) { els[i].appendChild(btn); added = true; console.log("BTN : " + url); }
-	if (!added) { setTimeout(function() { createButton(url) }, 100); }
+	let meta = document.getElementById("meta");
+	meta.appendChild(btn);
+	console.log("BTN : " + url);
+	
+	if (!document.getElementById(btn.id)) { setTimeout(function() { createButton(url) }, 100); }
 }
 
 
