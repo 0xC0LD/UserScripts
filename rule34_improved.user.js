@@ -1003,7 +1003,8 @@ if (isPage_post) {
 		if (player != null) {
 			let vid = document.createElement("video");
 			vid.id = "gelcomVideoContainer";
-			vid.controls = true; 
+			vid.controls = true;
+			vid.volume = defaultVideoVolume;
 			vid.style.cssText = player.style.cssText;
 			let link = document.getElementById('stats').nextElementSibling.childNodes[3].childNodes[3].childNodes[0]
 			vid.src = link.href;
