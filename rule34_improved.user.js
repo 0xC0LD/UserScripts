@@ -315,7 +315,11 @@ function updateNavbar_p1(postID) {
 function updateNavbar_p2(postID) {
 	let navbar = document.getElementById("subnavbar");
 	for (let i = 0; i < navbar.childNodes.length; i++) { if (navbar.childNodes[i].id == "isinfav2") { return; } }
-	if (GM_getValue("favlist2", []).includes(postID)) {
+	
+	let favlist = GM_getValue("favlist2", []);
+	let cont = false;
+	for (let i = 0; i < favlist.length; i++) { if (favlist[i][0] == postID) { cont = true; break; } }
+	if (cont) {
 		let div = document.createElement("div");
 		div.id = "isinfav2";
 		div.title = "Post is in Super Favorites."
@@ -327,6 +331,7 @@ function updateNavbar_p2(postID) {
 function updateNavbar(postID) {
 	if (!isPage_post || !showFavPosts) { return; }
 	updateNavbar_p1(postID);
+	console.log(postID);
 	updateNavbar_p2(postID);
 }
 
@@ -361,8 +366,20 @@ function favPost(id, close = false, element = null) {
 
 function favPost2(postID) {
 	let favlist = GM_getValue("favlist2", []);
-	if (!favlist.includes(postID)) { favlist.push(postID); GM_setValue("favlist2", favlist); }
-	updateNavbar(postID);
+	for (let i = 0; i < favlist.length; i++) { if (favlist[i][0] == postID) { return; } }
+	
+	let link = "";
+	let as = document.getElementsByTagName("a");
+	for (let i = 0; i < as.length; i++) {
+		if (as[i].href && as[i].href.includes("saucenao.com")) {
+			link = as[i].href.split("&url=")[1];
+		}
+	}
+	if (link != "") {
+		favlist.push([postID, link]);
+		GM_setValue("favlist2", favlist);
+		updateNavbar(postID);
+	}
 }
 
 // get page html
@@ -882,7 +899,6 @@ if (showFavPosts) {
 
 // endless scrolling
 if (isPage_posts || isPage_fav) {
-	
 	let label = document.createElement("label");
 	label.className = "checkboxContainer";
 	label.title = "Enable endless scrolling";
@@ -1064,13 +1080,79 @@ if (isPage_post) {
 
 if (isPage_main) {
 	function loadExtraContent() {
+		let favTagsDiv = document.createElement("div");
+		favTagsDiv.className = "tagbar";
+		favTagsDiv.style = "position: fixed; top: 5px; right: 5px; border: lime 1px dashed; padding: 4px; width: 180px;"
+		
+		//document.getElementById("static-index").style = "float: left !important"
+		
+		let elements = document.getElementsByTagName("small");
+		while (elements[0]) { elements[0].remove(); }
+		
+		let favTagsDiv_h5 = document.createElement("h5");
+		favTagsDiv_h5.innerHTML = "Favorite Tags";
+		favTagsDiv.appendChild(favTagsDiv_h5);
+		
+		function favTagsDiv_add(text) {
+			let div = document.createElement("div");
+			let a = document.createElement("a");
+			
+			let rm = document.createElement("button");
+			rm.innerHTML = "-"
+			rm.title = "Remove";
+			rm.onclick = function() {
+				let taglist = GM_getValue("taglist", []);
+				GM_setValue("taglist", taglist.filter(e => e !== text));
+				div.remove();
+			}
+			
+			a.innerHTML = text;
+			a.href = "index.php?page=post&s=list&tags=" + text;
+			div.appendChild(rm);
+			div.appendChild(a);
+			favTagsDiv.appendChild(div);
+		}
+		
+		let input = document.createElement("input");
+		input.style = "width: 82%; display: inline-block;";
+		input.type = "text";
+		
+		function add() {
+			let taglist = GM_getValue("taglist", []);
+			if (!taglist.includes(input.value)) {
+				taglist.push(input.value);
+				GM_setValue("taglist", taglist);
+				favTagsDiv_add(input.value);
+				input.value = "";
+			}
+		}
+		
+		input.addEventListener("keydown", function(event) { if (event.keyCode == 13) { add(); } });
+		
+		let btn_add = document.createElement("Add");
+		btn_add.style = "padding: 1px; color: lime; cursor: pointer;"
+		btn_add.innerHTML = "🔽";
+		btn_add.onclick = function () { add(); };
+		btn_add.title = "Add";
+		
+		favTagsDiv.appendChild(input);
+		favTagsDiv.appendChild(btn_add);
+		
+		let tl = GM_getValue("taglist", []);
+		for (let i = 0; i < tl.length; i++) { favTagsDiv_add(tl[i]); }
+		
 		let superFavDiv = document.createElement("div");
-		superFavDiv.className = "content";
-		superFavDiv.style = "border: lime 1px dashed; padding: 4px;"
+		superFavDiv.className = "superFavCont";
+		superFavDiv.style = "display: inline-block; border: lime 1px dashed; padding: 4px;"
+		
+		let superFavDiv_h5 = document.createElement("h5");
+		superFavDiv_h5.innerHTML = "Super Favorites";
+		superFavDiv.appendChild(superFavDiv_h5);
 		
 		let favlist = GM_getValue("favlist2", []);
 		for (let i = 0; i < favlist.length; i++) {
-			let id = favlist[i];
+			let id = favlist[i][0];
+			let thumbURL = favlist[i][1];
 			
 			let span = document.createElement("span");
 			span.id = "s" + id;
@@ -1086,13 +1168,26 @@ if (isPage_main) {
 			img.className = "preview";
 			img.style.border = "none";
 			img.alt = id;
+			img.src = thumbURL;
 			a.appendChild(img);
 			
+			let btn_rm = document.createElement("Remove");
+			btn_rm.innerHTML = "❌REMOVE❌";
+			btn_rm.title = "Remove from Super Favorites"
+			btn_rm.style = "cursor: pointer;"
+			btn_rm.onclick = function () {
+				favlist.splice(i, 1);
+				GM_setValue("favlist2", favlist);
+				span.remove();
+			}
+			
 			span.appendChild(a);
+			span.appendChild(btn_rm);
 			
 			superFavDiv.appendChild(span);
 		}
 		
+		document.body.appendChild(favTagsDiv);
 		document.body.appendChild(superFavDiv);
 	}
 	
