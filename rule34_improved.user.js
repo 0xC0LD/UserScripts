@@ -226,7 +226,7 @@ var postCss = `
 .custom-button:hover  { background-color: rgba(100,255,100,.2); }
 .custom-button:active { background-color: rgba(255,255,255,1);  }
 
-#isinfav {
+#isinfav, #isinfav2 {
 	display: inline-block;
 	margin-left: 10px;
 	font-size: 18px;
@@ -260,7 +260,18 @@ var heartStyle = `
 	transform: translate(-50%,-50%);
 	font-size: 30px;
 	opacity: 0.8;
-`
+`;
+
+var expandButtonStyle = `
+	position: fixed;
+	top: 5px;
+	right: 5px;
+	cursor: pointer;
+	border: darkgreen 2px dashed;
+	width: 20px;
+	height: 20px;
+	text-align: center;
+`;
 
 /// TODO:
 //    - inject custom checkbox css / radio button css
@@ -289,19 +300,34 @@ function showFavPosts_check(element) {
 	}
 }
 
-function updateNavbar(postID) {
-	
-	if (!isPage_post || !showFavPosts) { return; }
+function updateNavbar_p1(postID) {
 	let navbar = document.getElementById("subnavbar");
 	for (let i = 0; i < navbar.childNodes.length; i++) { if (navbar.childNodes[i].id == "isinfav") { return; } }
-	
 	if (GM_getValue("favlist", []).includes(postID)) {
 		let div = document.createElement("div");
 		div.id = "isinfav";
 		div.title = "Post is in Favorites."
-		div.innerHTML = "💟";
+		div.innerHTML = "❤️";
 		navbar.appendChild(div);
 	}
+}
+
+function updateNavbar_p2(postID) {
+	let navbar = document.getElementById("subnavbar");
+	for (let i = 0; i < navbar.childNodes.length; i++) { if (navbar.childNodes[i].id == "isinfav2") { return; } }
+	if (GM_getValue("favlist2", []).includes(postID)) {
+		let div = document.createElement("div");
+		div.id = "isinfav2";
+		div.title = "Post is in Super Favorites."
+		div.innerHTML = "💚";
+		navbar.appendChild(div);
+	}
+}
+
+function updateNavbar(postID) {
+	if (!isPage_post || !showFavPosts) { return; }
+	updateNavbar_p1(postID);
+	updateNavbar_p2(postID);
 }
 
 // add post to favorites, like it & add it to favlist
@@ -333,6 +359,12 @@ function favPost(id, close = false, element = null) {
 	}, 100);
 }
 
+function favPost2(postID) {
+	let favlist = GM_getValue("favlist2", []);
+	if (!favlist.includes(postID)) { favlist.push(postID); GM_setValue("favlist2", favlist); }
+	updateNavbar(postID);
+}
+
 // get page html
 function httpGet(url, callback, async) {
     let xhr = new XMLHttpRequest();
@@ -349,10 +381,13 @@ function httpGet(url, callback, async) {
 
 function sleep(milliseconds) { return new Promise(resolve => setTimeout(resolve, milliseconds)); }
 var originalTitle = document.title;
+
 var isPage_post = document.location.href.includes("index.php?page=post&s=view");
 var isPage_posts = document.location.href.includes("index.php?page=post&s=list");
 var isPage_fav = document.location.href.includes("index.php?page=favorites&s=view");
 var isPage_opt = document.location.href.includes("index.php?page=account&s=options");
+var isPage_main = (document.location.href == "http://rule34.xxx/" || document.location.href == "https://rule34.xxx/");
+console.log(window.location);
 
 // get thumbnail post id
 function getPostID(element) {
@@ -427,6 +462,26 @@ function thumbFav_check(element) {
 		
 	element.onmouseenter = function() { tag.style.display = "block"; };
 	element.onmouseleave = function() { tag.style.display = "none";  };
+}
+
+function embedDefaultVideo() {
+	let playerCont = document.getElementById("gelcomVideoContainer");
+	if (!playerCont) { return; }
+	
+	// set style of video as the container
+	let vid = document.createElement("video");
+	vid.id = "VideoPlayer";
+	vid.controls = true;
+	vid.volume = defaultVideoVolume;
+	vid.style.cssText = playerCont.style.cssText;
+	
+	// get player src
+	let player = document.getElementById("gelcomVideoPlayer");
+	// let link = document.getElementById('stats').nextElementSibling.childNodes[3].childNodes[3].childNodes[0];
+	vid.src = player.currentSrc;
+	playerCont.style.display = "none";
+	playerCont.parentNode.insertBefore(vid, playerCont);
+	//playerCont.parentNode.replaceChild(vid, playerCont);
 }
 
 if (hideBlacklistedThumbnails) {
@@ -992,24 +1047,60 @@ if (isPage_post) {
 	btn_next.innerHTML = "⏭️next";
 	btn_next.onclick = function() { document.querySelector(".sidebar > div:nth-child(12) > ul:nth-child(2) > li:nth-child(2) > a:nth-child(1)").click(); };
 	cont.appendChild(btn_next);
+	
+	let btn_fav2 = document.createElement("button");
+	btn_fav2.className = "custom-button";
+	btn_fav2.innerHTML = "💚superfav";
+	btn_fav2.onclick = function() { favPost2(postID); };
+	cont.appendChild(btn_fav2);
   
 	navbar.appendChild(cont);
   
 	// show if a post is in fav
 	updateNavbar(postID);
 	
-	if (embedVideo) {
-		let player = document.getElementById("gelcomVideoContainer");
-		if (player != null) {
-			let vid = document.createElement("video");
-			vid.id = "gelcomVideoContainer";
-			vid.controls = true;
-			vid.volume = defaultVideoVolume;
-			vid.style.cssText = player.style.cssText;
-			let link = document.getElementById('stats').nextElementSibling.childNodes[3].childNodes[3].childNodes[0]
-			vid.src = link.href;
-			player.parentNode.replaceChild(vid, player);
+	if (embedVideo) { embedDefaultVideo(); }
+}
+
+if (isPage_main) {
+	function loadExtraContent() {
+		let superFavDiv = document.createElement("div");
+		superFavDiv.className = "content";
+		superFavDiv.style = "border: lime 1px dashed; padding: 4px;"
+		
+		let favlist = GM_getValue("favlist2", []);
+		for (let i = 0; i < favlist.length; i++) {
+			let id = favlist[i];
+			
+			let span = document.createElement("span");
+			span.id = "s" + id;
+			span.style = "border: none; position: relative; padding-left: 10px; padding-right: 2px;";
+			span.className = "thumb sfav";
+			
+			let a = document.createElement("a");
+			a.style.border = "none";
+			a.id = "p" + id;
+			a.href = "index.php?page=post&s=view&id=" + id;
+			
+			let img = document.createElement("img");
+			img.className = "preview";
+			img.style.border = "none";
+			img.alt = id;
+			a.appendChild(img);
+			
+			span.appendChild(a);
+			
+			superFavDiv.appendChild(span);
 		}
+		
+		document.body.appendChild(superFavDiv);
 	}
 	
+	let btn_expand = document.createElement("btn_expand");
+	btn_expand.id = "expand-button";
+	btn_expand.innerHTML = "🔽";
+	btn_expand.title = "Expand";
+	btn_expand.style = expandButtonStyle;
+	btn_expand.onclick = function() { loadExtraContent(); btn_expand.remove(); }
+	document.body.appendChild(btn_expand);
 }
