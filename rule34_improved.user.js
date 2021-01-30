@@ -487,7 +487,7 @@ function embedDefaultVideo() {
 	
 	// set style of video as the container
 	let vid = document.createElement("video");
-	vid.id = "VideoPlayer";
+	vid.id = "gelcomVideoContainer";
 	vid.controls = true;
 	vid.volume = defaultVideoVolume;
 	vid.style.cssText = playerCont.style.cssText;
