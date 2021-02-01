@@ -17,6 +17,22 @@
 //|
 
 // Imagus settings you should use -> http://prntscr.com/wxk1og
+/*
+
+Features this scripts adds:
+	- AutoPlay for videos
+	- Set Default video volume for videos
+	- Video/Image resize to fit
+    - Add to favorites on enter
+	- Hide blacklisted thumbs
+	- Force Dark theme
+	- Better Dark theme CSS
+	- Remove bloat (hentai clicker, ...)
+	- Show which posts are in your fav / Hide posts that are in your fav
+	- 
+
+*/
+
 
 function recheckS(s_, s) { if (GM_getValue(s_, null) == null) { GM_setValue(s_, s); } }
 
@@ -249,16 +265,15 @@ var postCss = `
 
 var favedPostStyle = `
 	background: linear-gradient(to bottom, hotpink, purple);
-	padding: 3px;
 	opacity: 0.4;
 `;
 
 var heartStyle = `
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%,-50%);
-	font-size: 30px;
+	position: relative;
+	top: 1px;
+	left: 1px;
+	text-align: center;
+	font-size: 20px;
 	opacity: 0.8;
 `;
 
@@ -280,19 +295,20 @@ var expandButtonStyle = `
 // add custom css to show that the post is in fav
 function showFavPosts_check(element) {
 	
+	console.log(element);
+
 	if (element == null
 	||  element.className == "thumb fav"
 	|| !GM_getValue("favlist", []).includes(getPostID(element))
 	) { return }
 	
 	if (showFavPosts2) { element.remove(); return; }
-	let heart = document.createElement("div");
+	let heart = document.createElement("p");
 	heart.style = heartStyle;
 	heart.innerHTML = "❤️";
 	element.className = "thumb fav";
-	element.childNodes[0].style = "position: relative; width: auto; height: auto;"
-	element.childNodes[0].appendChild(heart);
-	element.childNodes[0].childNodes[0].style = favedPostStyle;
+	element.appendChild(heart);
+	element.style = favedPostStyle;
 	
 	if (thumbFav) {
 		element.onmouseenter = null;
@@ -899,6 +915,7 @@ if (showFavPosts) {
 
 // endless scrolling
 if (isPage_posts || isPage_fav) {
+	
 	let label = document.createElement("label");
 	label.className = "checkboxContainer";
 	label.title = "Enable endless scrolling";
@@ -1079,7 +1096,9 @@ if (isPage_post) {
 }
 
 if (isPage_main) {
+	
 	function loadExtraContent() {
+		
 		let favTagsDiv = document.createElement("div");
 		favTagsDiv.className = "tagbar";
 		favTagsDiv.style = "position: fixed; top: 5px; right: 5px; border: lime 1px dashed; padding: 4px; width: 180px;"
