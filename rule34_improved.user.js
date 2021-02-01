@@ -17,22 +17,6 @@
 //|
 
 // Imagus settings you should use -> http://prntscr.com/wxk1og
-/*
-
-Features this scripts adds:
-	- AutoPlay for videos
-	- Set Default video volume for videos
-	- Video/Image resize to fit
-    - Add to favorites on enter
-	- Hide blacklisted thumbs
-	- Force Dark theme
-	- Better Dark theme CSS
-	- Remove bloat (hentai clicker, ...)
-	- Show which posts are in your fav / Hide posts that are in your fav
-	- 
-
-*/
-
 
 function recheckS(s_, s) { if (GM_getValue(s_, null) == null) { GM_setValue(s_, s); } }
 
