@@ -253,10 +253,8 @@ var favedPostStyle = `
 `;
 
 var heartStyle = `
-	position: relative;
-	top: 1px;
-	left: 1px;
-	text-align: center;
+	position: absolute;
+	text-align: left;
 	font-size: 20px;
 	opacity: 0.8;
 `;
@@ -287,8 +285,9 @@ function showFavPosts_check(element) {
 	) { return }
 	
 	if (showFavPosts2) { element.remove(); return; }
-	let heart = document.createElement("p");
+	let heart = document.createElement("div");
 	heart.style = heartStyle;
+	heart.title = "Post is in Favorites.";
 	heart.innerHTML = "❤️";
 	element.className = "thumb fav";
 	element.appendChild(heart);
