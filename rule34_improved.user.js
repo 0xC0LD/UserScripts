@@ -417,6 +417,8 @@ function getPostID(element) {
 // when you press the remove button on the favorites page
 function showFavPosts_injectRemoveCode(element) {
 	
+	if (!isPage_fav) { return; }
+	
 	let rm = element.childNodes[2];
 	if (rm == undefined || rm == null) { return; }
 	rm.remove();
