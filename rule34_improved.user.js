@@ -277,7 +277,7 @@ var expandButtonStyle = `
 // add custom css to show that the post is in fav
 function showFavPosts_check(element) {
 	
-	console.log(element);
+	//console.log(element);
 
 	if (element == null
 	||  element.className == "thumb fav"
@@ -1084,6 +1084,8 @@ if (isPage_main) {
 	
 	function loadExtraContent() {
 		
+		
+		
 		let favTagsDiv = document.createElement("div");
 		favTagsDiv.className = "tagbar";
 		favTagsDiv.style = "position: fixed; top: 5px; right: 5px; border: lime 1px dashed; padding: 4px; width: 180px;"
@@ -1099,6 +1101,8 @@ if (isPage_main) {
 		
 		function favTagsDiv_add(text) {
 			let div = document.createElement("div");
+			div.className = "favtag";
+			
 			let a = document.createElement("a");
 			
 			let rm = document.createElement("button");
@@ -1118,7 +1122,7 @@ if (isPage_main) {
 		}
 		
 		let input = document.createElement("input");
-		input.style = "width: 82%; display: inline-block;";
+		input.style = "width: 93%; display: inline-block;";
 		input.type = "text";
 		
 		function add() {
@@ -1131,17 +1135,34 @@ if (isPage_main) {
 			}
 		}
 		
+		function sortItems() {
+			let elements = document.getElementsByClassName("favtag");
+			while (elements[0]) { elements[0].remove(); }
+			let tl = GM_getValue("taglist", []);
+			tl.sort();
+			for (let i = 0; i < tl.length; i++) { favTagsDiv_add(tl[i]); }
+			GM_setValue("taglist", tl);
+		}
+		
 		input.addEventListener("keydown", function(event) { if (event.keyCode == 13) { add(); } });
 		
-		let btn_add = document.createElement("Add");
+		let btn_add = document.createElement("button");
 		btn_add.style = "padding: 1px; color: lime; cursor: pointer;"
 		btn_add.innerHTML = "🔽";
 		btn_add.onclick = function () { add(); };
 		btn_add.title = "Add";
 		
+		let btn_sort = document.createElement("button");
+		btn_sort.style = "padding: 1px; color: lime; cursor: pointer;"
+		btn_sort.innerHTML = "🗂️";
+		btn_sort.onclick = function () { sortItems(); };
+		btn_sort.title = "Sort";
+		
 		favTagsDiv.appendChild(input);
 		favTagsDiv.appendChild(btn_add);
+		favTagsDiv.appendChild(btn_sort);
 		
+		// add fav tags
 		let tl = GM_getValue("taglist", []);
 		for (let i = 0; i < tl.length; i++) { favTagsDiv_add(tl[i]); }
 		
